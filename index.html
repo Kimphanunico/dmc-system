@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMC Hub — Trang chủ hệ thống</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --paper: #ffffff;
+    --ink: #0f1418;
+    --ink-soft: #4a5560;
+    --ink-light: #8a8f96;
+    --line: #e6e4dd;
+    --line-strong: #d4d0c4;
+    --accent: #c2410c;
+    --accent-soft: #fff1ea;
+    --accent-deep: #9a3208;
+    --section: #f4f2eb;
+    --gold: #b45309;
+    --gold-soft: #fef7ed;
+    --success: #065f46;
+    --success-soft: #d1fae5;
+    --danger: #991b1b;
+    --info: #1e40af;
+    --info-soft: #eff6ff;
+    --shadow-sm: 0 1px 0 rgba(15,20,24,.04);
+    --shadow: 0 1px 0 rgba(15,20,24,.04), 0 8px 24px -8px rgba(15,20,24,.08);
+    --shadow-lg: 0 1px 0 rgba(15,20,24,.04), 0 24px 48px -12px rgba(15,20,24,.14);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ===== Hero banner ===== */
+  .hero {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a2228 100%);
+    color: #fff;
+    padding: 36px 40px 100px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(194,65,12,.2) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50%; left: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(180,83,9,.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 30px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .brand-mark {
+    width: 38px; height: 38px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 700; font-size: 20px;
+    color: #fff;
+  }
+  .brand-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 700; font-size: 19px;
+    letter-spacing: -.02em;
+  }
+  .brand-name span { color: rgba(255,255,255,.5); font-weight: 400; }
+  .hero-meta {
+    font-size: 12.5px; color: rgba(255,255,255,.6);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 44px;
+    letter-spacing: -.03em;
+    line-height: 1.05;
+    margin: 0 0 12px;
+    max-width: 700px;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .hero-subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,.7);
+    margin: 0 0 24px;
+    max-width: 600px;
+    line-height: 1.55;
+  }
+  .hero-user {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 14px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 999px;
+    font-size: 12.5px;
+    color: rgba(255,255,255,.85);
+  }
+  .hero-user-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    color: #fff;
+  }
+
+  /* ===== Main content ===== */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+    position: relative;
+    z-index: 2;
+    margin-top: -70px;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    margin: 36px 0 16px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+  .section-title small {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-left: 10px;
+    font-style: italic;
+  }
+
+  /* ===== Module cards (main grid) ===== */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 920px) {
+    .modules-grid { grid-template-columns: 1fr; }
+  }
+
+  .module-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 26px 22px;
+    cursor: pointer;
+    transition: all .25s ease;
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column;
+    min-height: 220px;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .3s ease;
+  }
+  .module-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--ink);
+  }
+  .module-card:hover::before {
+    transform: scaleX(1);
+  }
+  .module-card.supplier::before { background: var(--info); }
+  .module-card.catalog::before  { background: var(--gold); }
+  .module-card.quote::before    { background: var(--accent); }
+
+  .module-icon-wrap {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .module-icon {
+    font-size: 32px;
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .module-card.supplier .module-icon { background: var(--info-soft); }
+  .module-card.catalog .module-icon  { background: var(--gold-soft); }
+  .module-card.quote .module-icon    { background: var(--accent-soft); }
+
+  .module-arrow {
+    font-size: 18px;
+    color: var(--ink-light);
+    transition: all .25s ease;
+  }
+  .module-card:hover .module-arrow {
+    color: var(--ink);
+    transform: translateX(4px);
+  }
+
+  .module-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    margin: 0 0 4px;
+    line-height: 1.15;
+  }
+  .module-desc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+  .module-stats {
+    display: flex; gap: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 11.5px;
+  }
+  .module-stat {
+    display: flex; flex-direction: column;
+    gap: 1px;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  /* ===== KPI row ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 800px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .kpi {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .kpi-label {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .kpi-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ===== Quick links ===== */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .quick-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all .15s;
+  }
+  .quick-card:hover {
+    border-color: var(--ink-soft);
+    background: var(--section);
+  }
+  .quick-icon {
+    font-size: 22px;
+    width: 38px; height: 38px;
+    background: var(--section);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .quick-text {
+    flex: 1; min-width: 0;
+  }
+  .quick-name {
+    font-weight: 600; font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .quick-desc {
+    font-size: 11px;
+    color: var(--ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Coming soon module */
+  .module-card.disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .module-card.disabled:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+    border-color: var(--line);
+  }
+  .coming-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--section);
+    color: var(--ink-soft);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+
+  /* Setup card */
+  .setup-card {
+    background: var(--accent-soft);
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px;
+  }
+  .setup-card.hidden { display: none; }
+  .setup-text {
+    flex: 1;
+  }
+  .setup-text strong {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: var(--accent-deep);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .setup-text p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  /* Settings modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,20,24,.55);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    border-radius: 14px;
+    max-width: 580px; width: 100%;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -10px rgba(0,0,0,.35);
+  }
+  .modal-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-head h2 {
+    margin: 0;
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 20px; letter-spacing: -.02em;
+  }
+  .modal-body {
+    padding: 22px 24px;
+  }
+  .modal-foot {
+    padding: 14px 24px;
+    border-top: 1px solid var(--line);
+    background: var(--section);
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+  .form-field {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 14px;
+  }
+  .form-field label {
+    font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--ink-soft); font-weight: 600;
+  }
+  .form-field input,
+  .form-field select {
+    border: 1px solid var(--line-strong);
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-family: inherit; font-size: 13px;
+    background: var(--paper); outline: none;
+  }
+  .form-field input:focus,
+  .form-field select:focus { border-color: var(--accent); }
+
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--paper);
+    color: var(--ink); padding: 8px 14px; font-size: 12.5px;
+    font-weight: 500; border-radius: 7px; cursor: pointer;
+    font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .btn:hover { background: var(--section); border-color: var(--ink-soft); }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.primary:hover { background: #000; }
+  .btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.accent:hover { background: var(--accent-deep); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+  .btn.ghost:hover { background: var(--section); color: var(--ink); }
+  .btn.sm { padding: 5px 10px; font-size: 11.5px; }
+
+  .footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    color: var(--ink-light);
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-top">
+      <div class="brand">
+        <div class="brand-mark" id="brand-mark">D</div>
+        <div>
+          <div class="brand-name" id="brand-name">DMC<span> · Operations Hub</span></div>
+          <div class="hero-meta" id="today-date"></div>
+        </div>
+      </div>
+      <button class="btn ghost" onclick="openSettings()" style="color:rgba(255,255,255,.7); border-color:rgba(255,255,255,.15)">⚙️ Cài đặt</button>
+    </div>
+
+    <h1 class="hero-title">
+      Chào mừng <em id="user-name">bạn</em>.<br>
+      Hệ thống vận hành tour inbound số hoá.
+    </h1>
+    <p class="hero-subtitle" id="hero-subtitle">
+      3 module liên kết — quản lý nhà cung cấp, sản phẩm tour, và tính giá báo giá khách. Tất cả trong 1 hệ thống.
+    </p>
+    <div class="hero-user" id="user-pill">
+      <div class="hero-user-avatar" id="user-avatar">B</div>
+      <span id="user-role">Admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN CONTAINER ===== -->
+<div class="container">
+
+  <!-- Setup card (shown if first time) -->
+  <div class="setup-card hidden" id="setup-card">
+    <div class="setup-text">
+      <strong>👋 Bắt đầu sử dụng</strong>
+      <p>Hãy đặt tên công ty và tên của bạn để cá nhân hoá hệ thống.</p>
+    </div>
+    <button class="btn accent" onclick="openSettings()">Cài đặt ngay →</button>
+  </div>
+
+  <!-- 3 main modules -->
+  <h2 class="section-title">Các module chính</h2>
+  <div class="modules-grid">
+
+    <a class="module-card supplier" href="SupplierHub.html">
+      <div class="module-icon-wrap">
+        <div class="module-icon">📁</div>
+        <div class="module-arrow">→</div>
+      </div>
+      <h3 class="module-name">Supplier Hub</h3>
+      <p class="module-desc">Database nhà cung cấp (Hotel, Cruise, Vận chuyển, Land DMC, Nhà hàng, Tham quan, HDV, Bảo hiểm).</p>
+      <div class="module-stats">
+        <div class="module-stat">
+          <div class="stat-num" id="stat-suppliers">—</div>
+          <div class="stat-label">NCC</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num" id="stat-tq">—</div>
+          <div class="stat-label">Vé tham quan</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num" id="stat-hdv">—</div>
+          <div class="stat-label">HDV cộng tác</div>
+        </div>
+      </div>
+    </a>
+
+    <a class="module-card catalog" href="TourCatalog.html">
+      <div class="module-icon-wrap">
+        <div class="module-icon">📦</div>
+        <div class="module-arrow">→</div>
+      </div>
+      <h3 class="module-name">Tour Catalog</h3>
+      <p class="module-desc">Sản phẩm tour bán sẵn — có chương trình, ảnh, price grid theo pax × hạng KS. Bấm <em>Generate Quote</em> để tính giá nhanh.</p>
+      <div class="module-stats">
+        <div class="module-stat">
+          <div class="stat-num" id="stat-tours">—</div>
+          <div class="stat-label">Sản phẩm</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num" id="stat-tour-types">—</div>
+          <div class="stat-label">Loại tour</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num" id="stat-tour-days">—</div>
+          <div class="stat-label">Ngày trung bình</div>
+        </div>
+      </div>
+    </a>
+
+    <a class="module-card quote" href="QuoteBuilder.html">
+      <div class="module-icon-wrap">
+        <div class="module-icon">💰</div>
+        <div class="module-arrow">→</div>
+      </div>
+      <h3 class="module-name">Quote Builder</h3>
+      <p class="module-desc">Tính giá chi tiết cho từng đoàn — VAT 8%, CIT 20%, ops bonus, markup. Export Excel.</p>
+      <div class="module-stats">
+        <div class="module-stat">
+          <div class="stat-num" id="stat-quotes">—</div>
+          <div class="stat-label">Quote</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num" id="stat-quotes-month">—</div>
+          <div class="stat-label">Tháng này</div>
+        </div>
+        <div class="module-stat">
+          <div class="stat-num">VND</div>
+          <div class="stat-label">Đơn vị</div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Coming soon -->
+  <h2 class="section-title">Sắp tới <small>· Sẽ build sau khi 3 module chính chạy ổn</small></h2>
+  <div class="modules-grid">
+    <div class="module-card disabled">
+      <div class="module-icon-wrap">
+        <div class="module-icon" style="background:var(--section)">🎯</div>
+      </div>
+      <div class="coming-tag">Sắp tới</div>
+      <h3 class="module-name">CRM Lead</h3>
+      <p class="module-desc">Quản lý inquiry từ agent + B2C. Pipeline: New → Working → Quoted → Confirmed.</p>
+    </div>
+    <div class="module-card disabled">
+      <div class="module-icon-wrap">
+        <div class="module-icon" style="background:var(--section)">📋</div>
+      </div>
+      <div class="coming-tag">Sắp tới</div>
+      <h3 class="module-name">Booking Hub</h3>
+      <p class="module-desc">Sau khi quote confirmed → tạo booking từng NCC, voucher, gửi rooming list.</p>
+    </div>
+    <div class="module-card disabled">
+      <div class="module-icon-wrap">
+        <div class="module-icon" style="background:var(--section)">📊</div>
+      </div>
+      <div class="coming-tag">Sắp tới</div>
+      <h3 class="module-name">Tài chính & P&L</h3>
+      <p class="module-desc">Công nợ NCC, công nợ khách, P&L mỗi tour, báo cáo tháng.</p>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <h2 class="section-title">Thống kê nhanh <small>· Cập nhật từ data hệ thống</small></h2>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Tổng NCC</div>
+      <div class="kpi-val" id="kpi-suppliers">—</div>
+      <div class="kpi-sub">trong Supplier Hub</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Tour bán sẵn</div>
+      <div class="kpi-val" id="kpi-tours">—</div>
+      <div class="kpi-sub">trong Tour Catalog</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Quote tổng</div>
+      <div class="kpi-val" id="kpi-quotes">—</div>
+      <div class="kpi-sub">đã tính giá</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Vùng phủ</div>
+      <div class="kpi-val" id="kpi-regions">—</div>
+      <div class="kpi-sub">vùng/miền đang phục vụ</div>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <h2 class="section-title">Liên kết nhanh <small>· Tools bên ngoài thường dùng</small></h2>
+  <div class="quick-grid">
+    <a class="quick-card" id="quick-drive" href="#" target="_blank">
+      <div class="quick-icon">📂</div>
+      <div class="quick-text">
+        <div class="quick-name">Google Drive</div>
+        <div class="quick-desc">Folder Contracts NCC</div>
+      </div>
+    </a>
+    <a class="quick-card" id="quick-gmail" href="https://mail.google.com" target="_blank">
+      <div class="quick-icon">📧</div>
+      <div class="quick-text">
+        <div class="quick-name">Gmail Sales</div>
+        <div class="quick-desc">Inbox inquiries</div>
+      </div>
+    </a>
+    <a class="quick-card" id="quick-calendar" href="https://calendar.google.com" target="_blank">
+      <div class="quick-icon">📅</div>
+      <div class="quick-text">
+        <div class="quick-name">Google Calendar</div>
+        <div class="quick-desc">Tour schedule + meetings</div>
+      </div>
+    </a>
+    <a class="quick-card" href="https://claude.ai" target="_blank">
+      <div class="quick-icon">🤖</div>
+      <div class="quick-text">
+        <div class="quick-name">Claude AI</div>
+        <div class="quick-desc">Extract contract, dịch, hỗ trợ</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<div class="footer">
+  DMC Operations Hub · v1.0 · Built with care for inbound tour operators
+</div>
+
+<!-- Settings modal -->
+<div class="modal-backdrop" id="settings-backdrop" onclick="closeSettings(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h2>⚙️ Cài đặt hệ thống</h2>
+      <button class="btn ghost" onclick="closeSettings()" style="font-size:18px; padding:4px 10px">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>Tên công ty</label>
+        <input type="text" id="s-company" placeholder="VD: Vietnam Wanderlust DMC">
+      </div>
+      <div class="form-field">
+        <label>Tên viết tắt (1 chữ)</label>
+        <input type="text" id="s-initial" maxlength="1" placeholder="V" style="text-transform:uppercase">
+      </div>
+      <div class="form-field">
+        <label>Tên của bạn</label>
+        <input type="text" id="s-user" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="form-field">
+        <label>Vai trò</label>
+        <select id="s-role">
+          <option value="Admin">Admin / Founder</option>
+          <option value="Sales B2B">Sales B2B</option>
+          <option value="Sales B2C">Sales B2C</option>
+          <option value="Product / Ops">Product / Operations</option>
+          <option value="Finance">Finance</option>
+          <option value="Guide">Guide / Tour leader</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Google Drive folder NCC (URL)</label>
+        <input type="text" id="s-drive" placeholder="https://drive.google.com/drive/folders/...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeSettings()">Huỷ</button>
+      <button class="btn accent" onclick="saveSettings()">💾 Lưu cài đặt</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SETTINGS
+// ============================================================
+const SETTINGS_KEY = 'dmchub_settings';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return {
+    company: '',
+    initial: 'D',
+    user: '',
+    role: 'Admin',
+    drive: ''
+  };
+}
+
+function saveSettingsObj(obj) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(obj));
+  } catch (e) {}
+}
+
+function applySettings() {
+  const s = loadSettings();
+  document.getElementById('brand-mark').textContent = s.initial || 'D';
+  document.getElementById('brand-name').innerHTML = (s.company || 'DMC') + '<span> · Operations Hub</span>';
+  document.getElementById('user-name').textContent = s.user || 'bạn';
+  document.getElementById('user-avatar').textContent = (s.user || 'B')[0].toUpperCase();
+  document.getElementById('user-role').textContent = s.role || 'Admin';
+
+  // Drive link
+  const driveLink = document.getElementById('quick-drive');
+  if (s.drive) {
+    driveLink.href = s.drive;
+  } else {
+    driveLink.href = 'https://drive.google.com';
+  }
+
+  // Setup card visibility
+  if (!s.company || !s.user) {
+    document.getElementById('setup-card').classList.remove('hidden');
+  } else {
+    document.getElementById('setup-card').classList.add('hidden');
+  }
+}
+
+function openSettings() {
+  const s = loadSettings();
+  document.getElementById('s-company').value = s.company || '';
+  document.getElementById('s-initial').value = s.initial || '';
+  document.getElementById('s-user').value = s.user || '';
+  document.getElementById('s-role').value = s.role || 'Admin';
+  document.getElementById('s-drive').value = s.drive || '';
+  document.getElementById('settings-backdrop').classList.add('show');
+}
+
+function closeSettings(e) {
+  if (e && e.target.id !== 'settings-backdrop') return;
+  document.getElementById('settings-backdrop').classList.remove('show');
+}
+
+function saveSettings() {
+  const company = document.getElementById('s-company').value.trim();
+  const initial = (document.getElementById('s-initial').value.trim() || (company[0] || 'D')).toUpperCase();
+  const user = document.getElementById('s-user').value.trim();
+  const role = document.getElementById('s-role').value;
+  const drive = document.getElementById('s-drive').value.trim();
+
+  saveSettingsObj({ company, initial, user, role, drive });
+  applySettings();
+  closeSettings();
+}
+
+// ============================================================
+// LIVE STATS — Read from sibling localStorages
+// ============================================================
+function loadModuleStats() {
+  // Supplier Hub stats
+  try {
+    const raw = localStorage.getItem('supplierhub_v1');
+    if (raw) {
+      const data = JSON.parse(raw);
+      const suppliers = Object.values(data.suppliers || {});
+      const total = suppliers.length;
+      const tqCount = suppliers.filter(s => s.category === 'tq').length;
+      const hdvCount = suppliers.filter(s => s.category === 'hdv').length;
+      const regions = new Set(suppliers.map(s => s.region).filter(Boolean)).size;
+
+      document.getElementById('stat-suppliers').textContent = total;
+      document.getElementById('stat-tq').textContent = tqCount;
+      document.getElementById('stat-hdv').textContent = hdvCount;
+      document.getElementById('kpi-suppliers').textContent = total;
+      document.getElementById('kpi-regions').textContent = regions;
+    } else {
+      document.getElementById('stat-suppliers').textContent = '0';
+      document.getElementById('stat-tq').textContent = '0';
+      document.getElementById('stat-hdv').textContent = '0';
+      document.getElementById('kpi-suppliers').textContent = '0';
+      document.getElementById('kpi-regions').textContent = '0';
+    }
+  } catch (e) { console.error('Load supplier stats:', e); }
+
+  // Tour Catalog stats
+  try {
+    const raw = localStorage.getItem('tourcatalog_v1');
+    if (raw) {
+      const data = JSON.parse(raw);
+      const tours = Object.values(data.tours || {});
+      const total = tours.length;
+      const types = new Set(tours.map(t => t.type).filter(Boolean)).size;
+      const avgDays = tours.length > 0
+        ? Math.round(tours.reduce((sum, t) => sum + (t.days || 0), 0) / tours.length)
+        : 0;
+
+      document.getElementById('stat-tours').textContent = total;
+      document.getElementById('stat-tour-types').textContent = types;
+      document.getElementById('stat-tour-days').textContent = avgDays + 'D';
+      document.getElementById('kpi-tours').textContent = total;
+    } else {
+      document.getElementById('stat-tours').textContent = '0';
+      document.getElementById('stat-tour-types').textContent = '0';
+      document.getElementById('stat-tour-days').textContent = '0D';
+      document.getElementById('kpi-tours').textContent = '0';
+    }
+  } catch (e) { console.error('Load tour stats:', e); }
+
+  // Quote Builder stats — try common storage keys
+  try {
+    const keys = ['qb_quotes_v3', 'qb_quotes_v2', 'qb_quotes', 'quotebuilder_quotes'];
+    let quotes = [];
+    for (const key of keys) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        try {
+          const data = JSON.parse(raw);
+          if (Array.isArray(data)) { quotes = data; break; }
+          if (data.quotes) { quotes = Object.values(data.quotes); break; }
+        } catch (e) {}
+      }
+    }
+    const total = quotes.length;
+    const now = new Date();
+    const thisMonth = quotes.filter(q => {
+      const dateStr = q.created || q.createdAt || q.date;
+      if (!dateStr) return false;
+      const d = new Date(dateStr);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+
+    document.getElementById('stat-quotes').textContent = total;
+    document.getElementById('stat-quotes-month').textContent = thisMonth;
+    document.getElementById('kpi-quotes').textContent = total;
+  } catch (e) { console.error('Load quote stats:', e); }
+}
+
+// ============================================================
+// DATE
+// ============================================================
+function setDate() {
+  const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  const months = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+  const d = new Date();
+  const dayName = days[d.getDay()];
+  const dateStr = `${dayName}, ngày ${d.getDate()} tháng ${months[d.getMonth()]} năm ${d.getFullYear()}`;
+  document.getElementById('today-date').textContent = dateStr;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  setDate();
+  applySettings();
+  loadModuleStats();
+});
+
+// Refresh stats when tab becomes visible (in case user switched modules and came back)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    loadModuleStats();
+  }
+});
+</script>
+</body>
+</html>
