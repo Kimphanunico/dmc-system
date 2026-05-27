@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TourCatalog — Sản phẩm tour bán sẵn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --paper: #ffffff;
+    --ink: #0f1418;
+    --ink-soft: #4a5560;
+    --ink-light: #8a8f96;
+    --line: #e6e4dd;
+    --line-strong: #d4d0c4;
+    --accent: #c2410c;
+    --accent-soft: #fff1ea;
+    --accent-deep: #9a3208;
+    --section: #f4f2eb;
+    --gold: #b45309;
+    --gold-soft: #fef7ed;
+    --success: #065f46;
+    --success-soft: #d1fae5;
+    --danger: #991b1b;
+    --shadow-sm: 0 1px 0 rgba(15,20,24,.04);
+    --shadow: 0 1px 0 rgba(15,20,24,.04), 0 8px 24px -8px rgba(15,20,24,.08);
+    --shadow-lg: 0 1px 0 rgba(15,20,24,.04), 0 24px 48px -12px rgba(15,20,24,.12);
+
+    /* Tier colors for hotel class */
+    --tier-3: #6b7280;
+    --tier-3-soft: #f3f4f6;
+    --tier-4: #1e40af;
+    --tier-4-soft: #eff6ff;
+    --tier-5: #b45309;
+    --tier-5-soft: #fef7ed;
+    --tier-lux: #6b21a8;
+    --tier-lux-soft: #faf5ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ===== Top nav ===== */
+  .appnav {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: var(--shadow-sm);
+  }
+  .logo {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: 17px; letter-spacing: -.02em;
+  }
+  .logo span { color: var(--accent); }
+  .crumbs {
+    font-size: 12px; color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    flex: 1;
+  }
+  .crumbs strong { color: var(--ink); }
+  .crumbs a { color: var(--ink-soft); text-decoration: none; cursor: pointer; }
+  .crumbs a:hover { color: var(--accent); }
+
+  /* ===== Buttons ===== */
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--paper);
+    color: var(--ink); padding: 7px 12px; font-size: 12px;
+    font-weight: 500; border-radius: 7px; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--section); border-color: var(--ink-soft); }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.primary:hover { background: #000; }
+  .btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.accent:hover { background: var(--accent-deep); }
+  .btn.danger { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+  .btn.danger:hover { background: #fde7e7; }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+  .btn.ghost:hover { background: var(--section); color: var(--ink); }
+  .btn.sm { padding: 4px 9px; font-size: 11px; }
+  .btn.lg { padding: 10px 18px; font-size: 13px; }
+
+  /* ===== Page layout ===== */
+  .page { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* ===== Catalog view ===== */
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 24px;
+    gap: 24px;
+  }
+  .page-title {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 32px; letter-spacing: -.03em;
+    margin: 0 0 4px; line-height: 1;
+  }
+  .page-subtitle {
+    color: var(--ink-soft); font-size: 13.5px;
+  }
+  .page-actions { display: flex; gap: 8px; }
+
+  /* ===== Filter bar ===== */
+  .filter-bar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .filter-group {
+    display: flex; gap: 4px; align-items: center;
+  }
+  .filter-label {
+    font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--ink-soft);
+    margin-right: 6px;
+  }
+  .chip {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    background: var(--paper); color: var(--ink-soft);
+    cursor: pointer; transition: all .12s;
+  }
+  .chip:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .chip.active {
+    background: var(--ink); color: #fff;
+    border-color: var(--ink);
+  }
+  .search-input {
+    flex: 1; min-width: 200px; max-width: 320px;
+    margin-left: auto;
+    border: 1px solid var(--line-strong); padding: 7px 11px;
+    border-radius: 7px; font-family: inherit; font-size: 12.5px;
+    background: var(--bg); outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); background: var(--paper); }
+
+  /* ===== Catalog grid ===== */
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
+  }
+  .tour-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all .2s;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .tour-card:hover {
+    border-color: var(--ink-soft);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .tour-image {
+    height: 180px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--section));
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .tour-image.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-family: 'Fraunces', serif;
+    font-size: 64px;
+    opacity: .35;
+  }
+  .tour-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(15,20,24,.85);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .tour-region {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,.95);
+    color: var(--ink);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+  }
+  .tour-card-body {
+    padding: 16px 18px;
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .tour-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 18px;
+    letter-spacing: -.015em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+  .tour-meta {
+    color: var(--ink-soft); font-size: 12px;
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tour-desc {
+    color: var(--ink-soft); font-size: 12.5px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  .tour-price-row {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .tour-price-from {
+    font-size: 11px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .tour-price-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .tour-price-unit {
+    font-size: 11px; color: var(--ink-soft);
+    margin-left: 3px;
+  }
+  .tour-card-actions {
+    display: flex; gap: 6px;
+    padding: 0 18px 14px;
+  }
+
+  /* ===== Empty state ===== */
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 80px 20px;
+    text-align: center;
+    background: var(--paper);
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+    color: var(--ink-soft);
+  }
+  .empty-state h3 {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    margin: 0 0 8px; color: var(--ink); font-size: 22px;
+    letter-spacing: -.02em;
+  }
+  .empty-state p { margin: 0 0 18px; font-size: 13.5px; }
+
+  /* ===== Detail view ===== */
+  .detail-wrap {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  @media (max-width: 980px) {
+    .detail-wrap { grid-template-columns: 1fr; }
+  }
+
+  .detail-hero {
+    height: 320px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-soft), var(--section));
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .detail-hero.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); opacity: .25;
+    font-family: 'Fraunces', serif;
+    font-size: 120px;
+  }
+  .detail-title {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 38px; letter-spacing: -.025em;
+    margin: 0 0 6px; line-height: 1.05;
+  }
+  .detail-tagline {
+    font-style: italic; color: var(--ink-soft);
+    font-size: 15px; margin-bottom: 16px;
+  }
+  .detail-meta {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 24px;
+    font-variant-numeric: tabular-nums;
+  }
+  .detail-meta strong { color: var(--ink); }
+  .detail-meta-icon {
+    font-size: 15px;
+    margin-right: 4px;
+  }
+
+  .detail-section {
+    margin-bottom: 32px;
+  }
+  .detail-section-title {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 18px; letter-spacing: -.015em;
+    margin: 0 0 10px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+  }
+  .detail-description {
+    font-size: 13.5px; line-height: 1.7;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+
+  /* Itinerary timeline */
+  .itinerary-day {
+    display: flex; gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .itinerary-day:last-child { border-bottom: none; }
+  .day-marker {
+    width: 60px; flex-shrink: 0;
+    text-align: center;
+  }
+  .day-num {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 26px; color: var(--accent);
+    line-height: 1;
+  }
+  .day-label {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--ink-soft);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .day-content {
+    flex: 1;
+  }
+  .day-title {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 15px;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .day-desc {
+    font-size: 12.5px; line-height: 1.55;
+    color: var(--ink-soft);
+    white-space: pre-wrap;
+  }
+  .day-meals {
+    font-size: 11px; color: var(--gold);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* Inclusion list */
+  .incl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 700px) {
+    .incl-grid { grid-template-columns: 1fr; }
+  }
+  .incl-box {
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .incl-box.included {
+    background: var(--success-soft);
+    border-color: #a7f3d0;
+  }
+  .incl-box.excluded {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+  .incl-title {
+    font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 6px;
+  }
+  .incl-box.included .incl-title { color: var(--success); }
+  .incl-box.excluded .incl-title { color: var(--danger); }
+  .incl-list {
+    font-size: 12.5px; line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--ink);
+  }
+
+  /* Right column - Price grid card */
+  .pricing-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+    box-shadow: var(--shadow);
+  }
+  .pricing-head {
+    background: var(--ink); color: #fff;
+    padding: 18px 22px;
+  }
+  .pricing-head h3 {
+    margin: 0 0 4px;
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 18px; letter-spacing: -.015em;
+  }
+  .pricing-head .currency {
+    font-size: 11px;
+    color: rgba(255,255,255,.7);
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .pricing-body {
+    padding: 18px 22px;
+  }
+  .price-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .price-grid th,
+  .price-grid td {
+    padding: 9px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .price-grid th:first-child,
+  .price-grid td:first-child {
+    text-align: left;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .price-grid thead th {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    border-bottom: 2px solid var(--ink);
+  }
+  .price-grid tbody tr:last-child td { border-bottom: none; }
+  .price-grid td .price-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .price-grid tbody tr:hover { background: var(--section); }
+
+  .pricing-actions {
+    padding: 14px 22px;
+    border-top: 1px solid var(--line);
+    background: var(--section);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* Tier badge in price grid */
+  .tier-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .tier-3 { background: var(--tier-3-soft); color: var(--tier-3); }
+  .tier-4 { background: var(--tier-4-soft); color: var(--tier-4); }
+  .tier-5 { background: var(--tier-5-soft); color: var(--tier-5); }
+  .tier-lux { background: var(--tier-lux-soft); color: var(--tier-lux); }
+
+  /* ===== Form (modal for add/edit) ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,20,24,.55);
+    display: none; align-items: flex-start; justify-content: center;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 40px 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    border-radius: 14px;
+    box-shadow: 0 30px 80px -10px rgba(0,0,0,.35);
+    max-width: 920px; width: 100%;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .modal-head {
+    padding: 18px 26px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-head h2 {
+    margin: 0;
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 22px; letter-spacing: -.02em;
+  }
+  .modal-body {
+    padding: 22px 26px;
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+  .modal-foot {
+    padding: 14px 26px;
+    border-top: 1px solid var(--line);
+    background: var(--section);
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-field {
+    display: flex; flex-direction: column;
+    gap: 5px;
+  }
+  .form-field.span-2 { grid-column: span 2; }
+  .form-field label {
+    font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--ink-soft); font-weight: 600;
+  }
+  .form-field label .req { color: var(--danger); margin-left: 2px; }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    border: 1px solid var(--line-strong);
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-family: inherit; font-size: 13px;
+    background: var(--paper); outline: none;
+    transition: border-color .12s;
+  }
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-field textarea {
+    resize: vertical;
+    line-height: 1.55;
+  }
+  .form-field .hint {
+    font-size: 10.5px; color: var(--ink-soft);
+    font-style: italic;
+  }
+  .section-divider {
+    grid-column: span 2;
+    margin: 12px 0 -4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-divider .sd-help {
+    color: var(--ink-soft);
+    font-weight: 500; font-size: 10.5px;
+    text-transform: none; letter-spacing: 0;
+    font-style: italic;
+  }
+
+  /* Day-by-day editor */
+  .day-editor {
+    grid-column: span 2;
+    background: var(--section);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .day-row {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .day-row-num {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 22px;
+    color: var(--accent);
+    line-height: 1;
+    padding-top: 6px;
+    text-align: center;
+  }
+  .day-row-fields {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .day-row-fields input,
+  .day-row-fields textarea {
+    border: 1px solid var(--line);
+    padding: 6px 9px;
+    border-radius: 6px;
+    font-family: inherit; font-size: 12px;
+    background: var(--paper); outline: none;
+  }
+  .day-row-fields input.day-title {
+    font-weight: 600; font-size: 13px;
+  }
+  .day-row-fields textarea {
+    min-height: 40px; resize: vertical;
+  }
+  .day-row-fields input:focus,
+  .day-row-fields textarea:focus {
+    border-color: var(--accent);
+  }
+  .day-row-actions {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+
+  /* Price grid editor */
+  .price-grid-editor {
+    grid-column: span 2;
+    background: var(--section);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .price-grid-editor-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .price-grid-editor-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--paper);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .price-grid-editor-table th,
+  .price-grid-editor-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    text-align: center;
+  }
+  .price-grid-editor-table th:last-child,
+  .price-grid-editor-table td:last-child {
+    border-right: none;
+  }
+  .price-grid-editor-table tr:last-child td {
+    border-bottom: none;
+  }
+  .price-grid-editor-table thead th {
+    background: var(--section);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    color: var(--ink);
+  }
+  .price-grid-editor-table tbody th {
+    background: var(--section);
+    font-size: 12px; font-weight: 600;
+    color: var(--ink-soft);
+  }
+  .price-input {
+    width: 100%;
+    border: none;
+    padding: 4px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: transparent;
+    outline: none;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .price-input:focus {
+    background: var(--accent-soft);
+    border-radius: 3px;
+  }
+
+  /* Generate Quote popup */
+  .gen-quote-form {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .gen-quote-form .form-field {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .gen-quote-form label {
+    width: 130px;
+    flex-shrink: 0;
+  }
+  .gen-quote-form select,
+  .gen-quote-form input {
+    flex: 1;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--ink); color: #fff;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,.4);
+    transform: translateY(100px); opacity: 0;
+    transition: all .25s ease-out;
+    z-index: 3000;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* Confirm dialog */
+  .confirm-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,20,24,.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .confirm-backdrop.show { display: flex; }
+  .confirm-box {
+    background: var(--paper); border-radius: 12px;
+    max-width: 420px; width: 90%;
+    overflow: hidden;
+  }
+  .confirm-head { padding: 18px 22px 10px; }
+  .confirm-head h3 { margin: 0 0 4px; font-family: 'Fraunces', serif; font-weight: 600; }
+  .confirm-head p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+  .confirm-foot {
+    padding: 12px 22px; background: var(--section);
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+
+  /* Brand markup pill */
+  .markup-suggest {
+    display: inline-flex; gap: 6px; align-items: center;
+    padding: 3px 8px;
+    background: var(--gold-soft);
+    color: var(--gold);
+    border-radius: 4px;
+    font-size: 11px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<div class="appnav">
+  <a href="index.html" class="btn ghost sm" style="margin-right:4px">🏠 Hub</a>
+  <div class="logo">Tour<span>Catalog</span></div>
+  <div class="crumbs" id="crumbs"><strong>Sản phẩm tour bán sẵn</strong></div>
+  <div style="display:flex; gap:8px">
+    <button class="btn ghost" onclick="exportData()" title="Sao lưu dữ liệu">💾 Backup</button>
+    <button class="btn ghost" onclick="importData()" title="Khôi phục">📥 Restore</button>
+    <button class="btn ghost" onclick="loadSamples()" title="Nạp 5 tour mẫu">🌱 Seed mẫu</button>
+  </div>
+</div>
+
+<div class="page" id="page-content">
+  <!-- Content injected by JS -->
+</div>
+
+<!-- ===== MODAL (Add/Edit Tour) ===== -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h2 id="modal-title">Thêm tour mới</h2>
+      <button class="btn ghost" onclick="closeModal()" style="font-size:18px; padding:4px 10px">×</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- Form injected by JS -->
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Huỷ</button>
+      <button class="btn primary" onclick="saveTour()">💾 Lưu tour</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Generate Quote modal ===== -->
+<div class="modal-backdrop" id="gen-quote-backdrop" onclick="closeGenQuote(event)">
+  <div class="modal" style="max-width:480px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h2>🚀 Tạo Quote từ tour này</h2>
+      <button class="btn ghost" onclick="closeGenQuote()" style="font-size:18px; padding:4px 10px">×</button>
+    </div>
+    <div class="modal-body" id="gen-quote-body">
+      <!-- Injected -->
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeGenQuote()">Huỷ</button>
+      <button class="btn accent" onclick="generateQuote()">Tạo Quote →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-backdrop" id="confirm-backdrop">
+  <div class="confirm-box">
+    <div class="confirm-head">
+      <h3 id="confirm-title">Xác nhận</h3>
+      <p id="confirm-msg"></p>
+    </div>
+    <div class="confirm-foot">
+      <button class="btn ghost" onclick="closeConfirm()">Huỷ</button>
+      <button class="btn danger" id="confirm-ok">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- File input -->
+<input type="file" id="fileImport" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const STORAGE_KEY = 'tourcatalog_v1';
+
+const REGIONS = ['Toàn quốc', 'Miền Bắc', 'Miền Trung', 'Miền Nam', 'Bắc + Trung', 'Trung + Nam', 'Bắc + Nam'];
+
+const TOUR_TYPES = ['Classic', 'Luxury', 'Adventure', 'Cultural', 'Beach', 'Honeymoon', 'Family', 'MICE'];
+
+const DEFAULT_PAX_TIERS = [2, 4, 6, 10, 15];
+const DEFAULT_HOTEL_TIERS = [
+  { key: '3star', label: 'Standard 3*', color: 'tier-3' },
+  { key: '4star', label: 'Premium 4*',  color: 'tier-4' },
+  { key: '5star', label: 'Luxury 5*',   color: 'tier-5' }
+];
+
+const CURRENCIES = [
+  { code: 'USD', symbol: '$',  flag: '🇺🇸' },
+  { code: 'EUR', symbol: '€',  flag: '🇪🇺' },
+  { code: 'AUD', symbol: 'A$', flag: '🇦🇺' },
+  { code: 'GBP', symbol: '£',  flag: '🇬🇧' },
+  { code: 'VND', symbol: '₫',  flag: '🇻🇳' }
+];
+
+// ============================================================
+// DATA
+// ============================================================
+let db = loadDB();
+let currentView = 'catalog'; // 'catalog' | 'detail'
+let currentTourId = null;
+let editingTour = null;
+let currentFilters = { region: '', type: '', search: '' };
+let confirmCallback = null;
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { tours: {} };
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('Load DB failed:', e);
+    return { tours: {} };
+  }
+}
+
+function saveDB() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  } catch (e) {
+    toast('Lỗi lưu: ' + e.message, 'error');
+  }
+}
+
+function genId() {
+  return 't_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+const fmt = (n, currency) => {
+  if (!isFinite(n) || n === 0) return '—';
+  const c = CURRENCIES.find(x => x.code === currency) || CURRENCIES[0];
+  if (currency === 'VND') {
+    return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' ₫';
+  }
+  return c.symbol + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(Math.round(n));
+};
+
+// ============================================================
+// ROUTING
+// ============================================================
+function setView(view, tourId = null) {
+  currentView = view;
+  currentTourId = tourId;
+  render();
+}
+
+function render() {
+  if (currentView === 'catalog') {
+    renderCatalog();
+  } else if (currentView === 'detail') {
+    renderDetail();
+  }
+}
+
+// ============================================================
+// CATALOG VIEW
+// ============================================================
+function renderCatalog() {
+  document.getElementById('crumbs').innerHTML = '<strong>Sản phẩm tour bán sẵn</strong>';
+  const tours = filterTours();
+  const html = `
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Tour Catalog</h1>
+        <div class="page-subtitle">${Object.keys(db.tours).length} sản phẩm trong catalog · ${tours.length} hiển thị</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn primary" onclick="openModal()">＋ Thêm tour mới</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Vùng:</span>
+        <span class="chip ${currentFilters.region === '' ? 'active' : ''}" onclick="setFilter('region','')">Tất cả</span>
+        ${REGIONS.map(r => `<span class="chip ${currentFilters.region === r ? 'active' : ''}" onclick="setFilter('region','${escapeAttr(r)}')">${escapeHtml(r)}</span>`).join('')}
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Loại:</span>
+        <span class="chip ${currentFilters.type === '' ? 'active' : ''}" onclick="setFilter('type','')">Tất cả</span>
+        ${TOUR_TYPES.map(t => `<span class="chip ${currentFilters.type === t ? 'active' : ''}" onclick="setFilter('type','${escapeAttr(t)}')">${escapeHtml(t)}</span>`).join('')}
+      </div>
+      <input class="search-input" placeholder="🔍 Tìm theo tên, mã..." value="${escapeAttr(currentFilters.search)}" oninput="setFilter('search', this.value)">
+    </div>
+
+    <div class="catalog-grid">
+      ${tours.length === 0 ? renderEmpty() : tours.map(t => renderCard(t)).join('')}
+    </div>
+  `;
+  document.getElementById('page-content').innerHTML = html;
+}
+
+function renderCard(t) {
+  const minPrice = computeMinPrice(t);
+  const cur = t.currency || 'USD';
+  return `
+    <div class="tour-card" onclick="setView('detail', '${t.id}')">
+      <div class="tour-image ${t.heroImage ? '' : 'placeholder'}" ${t.heroImage ? `style="background-image:url('${escapeAttr(t.heroImage)}')"` : ''}>
+        ${!t.heroImage ? '<span>VN</span>' : ''}
+        <div class="tour-badge">${escapeHtml(t.type || 'Classic')}</div>
+        <div class="tour-region">${escapeHtml(t.region || 'Toàn quốc')}</div>
+        ${t.brochureUrl ? '<div style="position:absolute; bottom:12px; right:12px; background:rgba(196,65,12,.95); color:#fff; padding:4px 10px; border-radius:4px; font-size:10.5px; font-weight:600; display:flex; align-items:center; gap:4px">📄 PDF</div>' : ''}
+      </div>
+      <div class="tour-card-body">
+        <h3 class="tour-name">${escapeHtml(t.name)}</h3>
+        <div class="tour-meta">${t.days || 0}D${t.days ? t.days - 1 : 0}N · Min ${t.minPax || 2} pax · ${escapeHtml(t.code || '')}</div>
+        <div class="tour-desc">${escapeHtml(t.tagline || t.description || 'Chưa có mô tả')}</div>
+        <div class="tour-price-row">
+          <div>
+            <div class="tour-price-from">From</div>
+            <div class="tour-price-val">${fmt(minPrice, cur)}<span class="tour-price-unit">/pax</span></div>
+          </div>
+          <button class="btn sm primary" onclick="event.stopPropagation(); openGenQuote('${t.id}')">🚀 Quote</button>
+        </div>
+      </div>
+      <div class="tour-card-actions">
+        <button class="btn sm" onclick="event.stopPropagation(); editTour('${t.id}')">✏️ Sửa</button>
+        <button class="btn sm" onclick="event.stopPropagation(); duplicateTour('${t.id}')">⎘ Nhân bản</button>
+        <button class="btn sm danger" onclick="event.stopPropagation(); confirmDelete('${t.id}')">🗑</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEmpty() {
+  return `
+    <div class="empty-state">
+      <h3>Chưa có tour nào trong catalog</h3>
+      <p>Bắt đầu xây tour bán sẵn đầu tiên, hoặc bấm "Seed mẫu" để có 5 tour inbound VN phổ biến.</p>
+      <button class="btn primary" onclick="openModal()">＋ Thêm tour đầu tiên</button>
+      <button class="btn" style="margin-left:8px" onclick="loadSamples()">🌱 Seed mẫu</button>
+    </div>
+  `;
+}
+
+function filterTours() {
+  let items = Object.values(db.tours);
+  if (currentFilters.region) items = items.filter(t => t.region === currentFilters.region);
+  if (currentFilters.type) items = items.filter(t => t.type === currentFilters.type);
+  if (currentFilters.search) {
+    const q = currentFilters.search.toLowerCase().trim();
+    items = items.filter(t =>
+      (t.name || '').toLowerCase().includes(q) ||
+      (t.code || '').toLowerCase().includes(q) ||
+      (t.description || '').toLowerCase().includes(q) ||
+      (t.tagline || '').toLowerCase().includes(q)
+    );
+  }
+  items.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+  return items;
+}
+
+function setFilter(key, val) {
+  currentFilters[key] = val;
+  renderCatalog();
+}
+
+function computeMinPrice(t) {
+  if (!t.priceGrid) return 0;
+  let min = Infinity;
+  Object.values(t.priceGrid).forEach(row => {
+    Object.values(row).forEach(v => {
+      const n = parseFloat(v);
+      if (isFinite(n) && n > 0 && n < min) min = n;
+    });
+  });
+  return min === Infinity ? 0 : min;
+}
+
+// ============================================================
+// DETAIL VIEW
+// ============================================================
+function renderDetail() {
+  const t = db.tours[currentTourId];
+  if (!t) {
+    setView('catalog');
+    return;
+  }
+  document.getElementById('crumbs').innerHTML = `<a onclick="setView('catalog')">Catalog</a> / <strong>${escapeHtml(t.name)}</strong>`;
+
+  const cur = t.currency || 'USD';
+  const paxTiers = t.paxTiers || DEFAULT_PAX_TIERS;
+  const hotelTiers = t.hotelTiers || DEFAULT_HOTEL_TIERS;
+
+  const html = `
+    <div style="margin-bottom:24px">
+      <button class="btn ghost" onclick="setView('catalog')">← Quay lại catalog</button>
+    </div>
+
+    <div class="detail-hero ${t.heroImage ? '' : 'placeholder'}" ${t.heroImage ? `style="background-image:url('${escapeAttr(t.heroImage)}')"` : ''}>
+      ${!t.heroImage ? '<span>VN</span>' : ''}
+    </div>
+
+    <div class="detail-wrap">
+      <div>
+        <h1 class="detail-title">${escapeHtml(t.name)}</h1>
+        ${t.tagline ? `<div class="detail-tagline">${escapeHtml(t.tagline)}</div>` : ''}
+
+        <div class="detail-meta">
+          <span><span class="detail-meta-icon">🗓️</span><strong>${t.days || 0}</strong> ngày · <strong>${t.days ? t.days - 1 : 0}</strong> đêm</span>
+          <span><span class="detail-meta-icon">📍</span><strong>${escapeHtml(t.region || 'Toàn quốc')}</strong></span>
+          <span><span class="detail-meta-icon">🎯</span><strong>${escapeHtml(t.type || 'Classic')}</strong></span>
+          <span><span class="detail-meta-icon">👥</span>Min <strong>${t.minPax || 2}</strong> · Max <strong>${t.maxPax || 16}</strong> pax</span>
+          <span><span class="detail-meta-icon">🏷️</span><strong style="font-family:'JetBrains Mono',monospace">${escapeHtml(t.code || '—')}</strong></span>
+          <div style="flex-basis:100%; height:0"></div>
+          <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap">
+            <button class="btn" onclick="editTour('${t.id}')">✏️ Sửa tour</button>
+            <button class="btn" onclick="duplicateTour('${t.id}')">⎘ Nhân bản</button>
+            ${t.brochureUrl ? `<a class="btn accent" href="${escapeAttr(t.brochureUrl)}" target="_blank">📄 Tải brochure PDF</a>` : '<button class="btn" onclick="editTour(\'' + t.id + '\')" style="opacity:.6">📄 Chưa có PDF brochure</button>'}
+            <button class="btn" onclick="exportTourBrochure('${t.id}')">🖨️ Print page</button>
+            <button class="btn danger" onclick="confirmDelete('${t.id}')">🗑 Xoá</button>
+          </div>
+        </div>
+
+        ${t.description ? `
+          <div class="detail-section">
+            <h2 class="detail-section-title">Giới thiệu tour</h2>
+            <div class="detail-description">${escapeHtml(t.description)}</div>
+          </div>
+        ` : ''}
+
+        ${t.days && t.itinerary && t.itinerary.length > 0 ? `
+          <div class="detail-section">
+            <h2 class="detail-section-title">Chương trình theo ngày</h2>
+            ${t.itinerary.map((day, i) => `
+              <div class="itinerary-day">
+                <div class="day-marker">
+                  <div class="day-num">${i + 1}</div>
+                  <div class="day-label">Day</div>
+                </div>
+                <div class="day-content">
+                  <h4 class="day-title">${escapeHtml(day.title || `Ngày ${i + 1}`)}</h4>
+                  <div class="day-desc">${escapeHtml(day.desc || '')}</div>
+                  ${day.meals ? `<div class="day-meals">🍴 ${escapeHtml(day.meals)}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${(t.included || t.excluded) ? `
+          <div class="detail-section">
+            <h2 class="detail-section-title">Bao gồm / Không bao gồm</h2>
+            <div class="incl-grid">
+              <div class="incl-box included">
+                <div class="incl-title">✓ Bao gồm</div>
+                <div class="incl-list">${escapeHtml(t.included || 'Chưa nhập')}</div>
+              </div>
+              <div class="incl-box excluded">
+                <div class="incl-title">✗ Không bao gồm</div>
+                <div class="incl-list">${escapeHtml(t.excluded || 'Chưa nhập')}</div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        ${t.notes ? `
+          <div class="detail-section">
+            <h2 class="detail-section-title">Ghi chú / Lưu ý</h2>
+            <div class="detail-description">${escapeHtml(t.notes)}</div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Right column: Price Grid -->
+      <div>
+        <div class="pricing-card">
+          <div class="pricing-head">
+            <h3>Bảng giá</h3>
+            <div class="currency">${cur} · Giá / khách</div>
+          </div>
+          <div class="pricing-body">
+            <table class="price-grid">
+              <thead>
+                <tr>
+                  <th>Pax</th>
+                  ${hotelTiers.map(ht => `<th>${escapeHtml(ht.label)}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${paxTiers.map(p => `
+                  <tr>
+                    <td>${p} pax</td>
+                    ${hotelTiers.map(ht => {
+                      const val = t.priceGrid?.[ht.key]?.[p] || 0;
+                      return `<td><span class="price-val">${fmt(val, cur)}</span></td>`;
+                    }).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            ${t.priceNote ? `<div class="hint" style="margin-top:10px; font-size:11px; color:var(--ink-soft); font-style:italic">${escapeHtml(t.priceNote)}</div>` : ''}
+          </div>
+          <div class="pricing-actions">
+            <button class="btn accent lg" onclick="openGenQuote('${t.id}')">🚀 Tạo Quote</button>
+            <div class="hint" style="text-align:center; font-size:10.5px">Mở QuoteBuilder với data đã pre-fill</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('page-content').innerHTML = html;
+}
+
+// ============================================================
+// ADD/EDIT MODAL
+// ============================================================
+function openModal(tourId = null) {
+  editingTour = tourId ? JSON.parse(JSON.stringify(db.tours[tourId])) : createBlankTour();
+  document.getElementById('modal-title').textContent = tourId ? 'Chỉnh sửa tour' : 'Thêm tour mới';
+  renderForm();
+  document.getElementById('modal-backdrop').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e && e.target.id !== 'modal-backdrop') return;
+  document.getElementById('modal-backdrop').classList.remove('show');
+  editingTour = null;
+}
+
+function createBlankTour() {
+  return {
+    id: null,
+    code: '',
+    name: '',
+    tagline: '',
+    region: 'Toàn quốc',
+    type: 'Classic',
+    days: 7,
+    minPax: 2,
+    maxPax: 16,
+    description: '',
+    heroImage: '',
+    currency: 'USD',
+    paxTiers: [...DEFAULT_PAX_TIERS],
+    hotelTiers: JSON.parse(JSON.stringify(DEFAULT_HOTEL_TIERS)),
+    priceGrid: {},
+    priceNote: 'Giá đã bao gồm tất cả dịch vụ trong "Bao gồm". Phụ thu single tính riêng.',
+    itinerary: [],
+    included: '- Khách sạn theo hạng đã chọn\n- Tất cả bữa ăn theo chương trình\n- Vé tham quan các điểm\n- Xe đưa đón theo lịch trình\n- HDV nói tiếng Anh\n- Bảo hiểm du lịch',
+    excluded: '- Vé máy bay quốc tế\n- Visa Việt Nam\n- Đồ uống có cồn\n- Chi phí cá nhân\n- Tip HDV và lái xe',
+    notes: ''
+  };
+}
+
+function renderForm() {
+  const t = editingTour;
+  const paxTiers = t.paxTiers || DEFAULT_PAX_TIERS;
+  const hotelTiers = t.hotelTiers || DEFAULT_HOTEL_TIERS;
+
+  // Ensure itinerary has enough days
+  while (t.itinerary.length < t.days) {
+    t.itinerary.push({ title: '', desc: '', meals: '' });
+  }
+  while (t.itinerary.length > t.days) {
+    t.itinerary.pop();
+  }
+
+  const html = `
+    <div class="form-grid">
+      <!-- Basic info -->
+      <div class="section-divider">📌 Thông tin cơ bản</div>
+
+      <div class="form-field">
+        <label>Mã tour <span class="req">*</span></label>
+        <input type="text" id="f-code" value="${escapeAttr(t.code)}" placeholder="VD: VNH-14D / NL-7D / MK-3D" style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent)">
+        <div class="hint">VD: VNH = Vietnam Highlight, NL = Northern Loop, MK = Mekong</div>
+      </div>
+      <div class="form-field">
+        <label>Tên tour <span class="req">*</span></label>
+        <input type="text" id="f-name" value="${escapeAttr(t.name)}" placeholder="Vietnam Highlights 14 Days">
+      </div>
+
+      <div class="form-field span-2">
+        <label>Tagline (1 dòng marketing)</label>
+        <input type="text" id="f-tagline" value="${escapeAttr(t.tagline)}" placeholder="VD: Discover Vietnam from Hanoi to the Mekong Delta in 14 unforgettable days">
+      </div>
+
+      <div class="form-field">
+        <label>Vùng <span class="req">*</span></label>
+        <select id="f-region">
+          ${REGIONS.map(r => `<option value="${escapeAttr(r)}" ${t.region === r ? 'selected' : ''}>${escapeHtml(r)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Loại tour</label>
+        <select id="f-type">
+          ${TOUR_TYPES.map(tt => `<option value="${escapeAttr(tt)}" ${t.type === tt ? 'selected' : ''}>${escapeHtml(tt)}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Số ngày <span class="req">*</span></label>
+        <input type="number" id="f-days" value="${t.days}" min="1" max="30" onchange="updateDays(this.value)">
+      </div>
+      <div class="form-field">
+        <label>Min pax / Max pax</label>
+        <div style="display:flex; gap:6px">
+          <input type="number" id="f-minPax" value="${t.minPax}" min="1" placeholder="Min" style="flex:1">
+          <input type="number" id="f-maxPax" value="${t.maxPax}" min="1" placeholder="Max" style="flex:1">
+        </div>
+      </div>
+
+      <div class="form-field span-2">
+        <label>Hero image URL (optional)</label>
+        <input type="text" id="f-heroImage" value="${escapeAttr(t.heroImage)}" placeholder="https://images.unsplash.com/... (link ảnh từ Drive / Unsplash)">
+      </div>
+
+      <div class="form-field span-2">
+        <label>📄 PDF Brochure URL <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--ink-soft); font-size:11px; font-style:italic">(file PPT đã export PDF trên Drive — để sale gửi nhanh cho khách)</span></label>
+        <input type="text" id="f-brochureUrl" value="${escapeAttr(t.brochureUrl || '')}" placeholder="https://drive.google.com/file/d/.../view">
+        <div class="hint">VD: Bạn thiết kế tour này trên PowerPoint → Export PDF → Upload Drive → paste link share vào đây. Khi sale cần gửi cho khách, bấm "Tải brochure".</div>
+      </div>
+
+      <div class="form-field span-2">
+        <label>Giới thiệu tour (paragraph chính)</label>
+        <textarea id="f-description" rows="4" placeholder="VD: A classic journey through Vietnam covering the imperial capital of Hue, the romantic ancient town of Hoi An, and the bustling streets of Hanoi and Ho Chi Minh City...">${escapeHtml(t.description)}</textarea>
+      </div>
+
+      <!-- Pricing -->
+      <div class="section-divider">
+        💰 Bảng giá theo Pax × Hạng KS
+        <span class="sd-help">Nhập 1 lần, dùng cho mọi quote</span>
+      </div>
+
+      <div class="form-field">
+        <label>Loại tiền</label>
+        <select id="f-currency" onchange="editingTour.currency = this.value">
+          ${CURRENCIES.map(c => `<option value="${c.code}" ${t.currency === c.code ? 'selected' : ''}>${c.flag} ${c.code} (${c.symbol})</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Bậc Pax (cách nhau dấu phẩy)</label>
+        <input type="text" id="f-paxTiers" value="${paxTiers.join(', ')}" placeholder="VD: 2, 4, 6, 10, 15" onchange="updatePaxTiers(this.value)">
+      </div>
+
+      <div class="price-grid-editor">
+        <div class="price-grid-editor-head">
+          <strong style="font-size:12px">Bảng giá (giá / khách)</strong>
+          <span class="markup-suggest">Markup gợi ý: 4* +25% · 5* +30%</span>
+        </div>
+        <table class="price-grid-editor-table">
+          <thead>
+            <tr>
+              <th>Pax</th>
+              ${hotelTiers.map(ht => `<th><span class="tier-pill ${ht.color}">${escapeHtml(ht.label)}</span></th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${paxTiers.map(p => `
+              <tr>
+                <th>${p} pax</th>
+                ${hotelTiers.map(ht => {
+                  const val = t.priceGrid?.[ht.key]?.[p] || '';
+                  return `<td><input type="number" class="price-input" data-tier="${ht.key}" data-pax="${p}" value="${val}" placeholder="0" onchange="updatePrice('${ht.key}', ${p}, this.value)"></td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-field span-2">
+        <label>Ghi chú giá (optional)</label>
+        <input type="text" id="f-priceNote" value="${escapeAttr(t.priceNote)}" placeholder="VD: Giá đã bao gồm tất cả. Phụ thu single $200/đêm.">
+      </div>
+
+      <!-- Itinerary -->
+      <div class="section-divider">
+        🗓️ Chương trình theo ngày
+        <span class="sd-help">${t.days} ngày — Day 1 đến Day ${t.days}</span>
+      </div>
+
+      <div class="day-editor">
+        ${t.itinerary.map((day, i) => `
+          <div class="day-row">
+            <div class="day-row-num">D${i + 1}</div>
+            <div class="day-row-fields">
+              <input type="text" class="day-title" placeholder="Tiêu đề ngày (VD: Hanoi Arrival → Welcome Dinner)" value="${escapeAttr(day.title)}" onchange="updateDay(${i}, 'title', this.value)">
+              <textarea placeholder="Mô tả chi tiết hoạt động trong ngày..." onchange="updateDay(${i}, 'desc', this.value)">${escapeHtml(day.desc)}</textarea>
+              <input type="text" placeholder="Bữa ăn (VD: B, L, D / B, D / Welcome dinner)" value="${escapeAttr(day.meals)}" onchange="updateDay(${i}, 'meals', this.value)">
+            </div>
+            <div class="day-row-actions">
+              <span style="font-size:10px; color:var(--ink-soft); writing-mode:vertical-rl">D${i + 1}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Included / Excluded -->
+      <div class="section-divider">📋 Bao gồm / Không bao gồm</div>
+
+      <div class="form-field">
+        <label>✓ Bao gồm</label>
+        <textarea id="f-included" rows="6" placeholder="- Khách sạn theo hạng đã chọn&#10;- Bữa ăn theo chương trình...">${escapeHtml(t.included)}</textarea>
+      </div>
+      <div class="form-field">
+        <label>✗ Không bao gồm</label>
+        <textarea id="f-excluded" rows="6" placeholder="- Vé máy bay quốc tế&#10;- Visa Việt Nam...">${escapeHtml(t.excluded)}</textarea>
+      </div>
+
+      <div class="form-field span-2">
+        <label>Ghi chú / Lưu ý đặc biệt</label>
+        <textarea id="f-notes" rows="2" placeholder="Tour không phù hợp trẻ <6 tuổi do đi bộ nhiều. Cần đặt trước 30 ngày cho mùa peak...">${escapeHtml(t.notes)}</textarea>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-body').innerHTML = html;
+}
+
+function updateDays(val) {
+  const days = parseInt(val) || 1;
+  editingTour.days = days;
+  while (editingTour.itinerary.length < days) {
+    editingTour.itinerary.push({ title: '', desc: '', meals: '' });
+  }
+  while (editingTour.itinerary.length > days) {
+    editingTour.itinerary.pop();
+  }
+  renderForm();
+}
+
+function updateDay(idx, key, val) {
+  if (editingTour.itinerary[idx]) {
+    editingTour.itinerary[idx][key] = val;
+  }
+}
+
+function updatePaxTiers(val) {
+  const tiers = val.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+  if (tiers.length > 0) {
+    editingTour.paxTiers = tiers;
+    renderForm();
+  }
+}
+
+function updatePrice(tierKey, pax, val) {
+  if (!editingTour.priceGrid) editingTour.priceGrid = {};
+  if (!editingTour.priceGrid[tierKey]) editingTour.priceGrid[tierKey] = {};
+  editingTour.priceGrid[tierKey][pax] = parseFloat(val) || 0;
+}
+
+function saveTour() {
+  // Read all form fields into editingTour
+  const get = id => document.getElementById(id)?.value || '';
+  editingTour.code = get('f-code').trim().toUpperCase();
+  editingTour.name = get('f-name').trim();
+  editingTour.tagline = get('f-tagline').trim();
+  editingTour.region = get('f-region');
+  editingTour.type = get('f-type');
+  editingTour.days = parseInt(get('f-days')) || 1;
+  editingTour.minPax = parseInt(get('f-minPax')) || 1;
+  editingTour.maxPax = parseInt(get('f-maxPax')) || 30;
+  editingTour.heroImage = get('f-heroImage').trim();
+  editingTour.brochureUrl = get('f-brochureUrl').trim();
+  editingTour.description = get('f-description').trim();
+  editingTour.currency = get('f-currency') || 'USD';
+  editingTour.priceNote = get('f-priceNote').trim();
+  editingTour.included = get('f-included').trim();
+  editingTour.excluded = get('f-excluded').trim();
+  editingTour.notes = get('f-notes').trim();
+
+  // Validation
+  if (!editingTour.code) return toast('Mã tour bắt buộc', 'error');
+  if (!editingTour.name) return toast('Tên tour bắt buộc', 'error');
+
+  // Check duplicate code (except self)
+  const dup = Object.values(db.tours).find(t => t.code === editingTour.code && t.id !== editingTour.id);
+  if (dup) return toast('Mã ' + editingTour.code + ' đã tồn tại', 'error');
+
+  if (editingTour.id) {
+    db.tours[editingTour.id] = { ...editingTour, updated: new Date().toISOString() };
+    toast('✓ Đã cập nhật ' + editingTour.code, 'success');
+  } else {
+    const id = genId();
+    editingTour.id = id;
+    db.tours[id] = { ...editingTour, created: new Date().toISOString(), updated: new Date().toISOString() };
+    currentTourId = id;
+    toast('✓ Đã tạo tour ' + editingTour.code, 'success');
+  }
+
+  saveDB();
+  closeModal();
+  render();
+}
+
+function editTour(id) {
+  openModal(id);
+}
+
+function duplicateTour(id) {
+  const t = db.tours[id];
+  if (!t) return;
+  const newId = genId();
+  const newCode = t.code + '-COPY';
+  db.tours[newId] = {
+    ...JSON.parse(JSON.stringify(t)),
+    id: newId,
+    code: newCode,
+    name: t.name + ' (Copy)',
+    created: new Date().toISOString(),
+    updated: new Date().toISOString()
+  };
+  saveDB();
+  render();
+  toast('✓ Đã nhân bản → ' + newCode, 'success');
+}
+
+function confirmDelete(id) {
+  const t = db.tours[id];
+  if (!t) return;
+  openConfirm('Xoá tour', `Xoá "${t.name}" (${t.code})? Hành động không thể hoàn tác.`, () => {
+    delete db.tours[id];
+    saveDB();
+    setView('catalog');
+    toast('✓ Đã xoá ' + t.code, 'success');
+  });
+}
+
+// ============================================================
+// GENERATE QUOTE → Connect to QuoteBuilder
+// ============================================================
+function openGenQuote(tourId) {
+  const t = db.tours[tourId];
+  if (!t) return;
+  const cur = t.currency || 'USD';
+  const paxTiers = t.paxTiers || DEFAULT_PAX_TIERS;
+  const hotelTiers = t.hotelTiers || DEFAULT_HOTEL_TIERS;
+
+  document.getElementById('gen-quote-body').innerHTML = `
+    <div class="hint" style="background:var(--accent-soft); border-left:3px solid var(--accent); padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:12.5px; line-height:1.6; color:var(--ink); font-style:normal">
+      <strong>Chọn cấu hình tour cho khách này.</strong> Hệ thống sẽ tạo Quote pre-filled với data đã chọn (số khách, hạng KS, ngày), sau đó bạn có thể chỉnh chi tiết trong QuoteBuilder.
+    </div>
+    <div class="gen-quote-form">
+      <div class="form-field">
+        <label>Tour:</label>
+        <input type="text" value="${escapeAttr(t.code + ' — ' + t.name)}" readonly style="background:var(--section)">
+      </div>
+      <div class="form-field">
+        <label>Số pax:</label>
+        <select id="gq-pax">
+          ${paxTiers.map(p => `<option value="${p}">${p} pax</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Hạng KS:</label>
+        <select id="gq-tier">
+          ${hotelTiers.map(ht => `<option value="${ht.key}">${ht.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Ngày khởi hành:</label>
+        <input type="date" id="gq-startDate" value="${new Date(Date.now() + 30*86400000).toISOString().slice(0,10)}">
+      </div>
+      <div class="form-field">
+        <label>Tên khách / agent:</label>
+        <input type="text" id="gq-customer" placeholder="VD: Mr. John Smith / Travelocity Inc.">
+      </div>
+      <div class="form-field">
+        <label>Loại tiền:</label>
+        <select id="gq-currency">
+          ${CURRENCIES.map(c => `<option value="${c.code}" ${cur === c.code ? 'selected' : ''}>${c.flag} ${c.code}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  `;
+  document.getElementById('gen-quote-backdrop').classList.add('show');
+  document.getElementById('gen-quote-backdrop').dataset.tourId = tourId;
+}
+
+function closeGenQuote(e) {
+  if (e && e.target.id !== 'gen-quote-backdrop') return;
+  document.getElementById('gen-quote-backdrop').classList.remove('show');
+}
+
+function generateQuote() {
+  const tourId = document.getElementById('gen-quote-backdrop').dataset.tourId;
+  const t = db.tours[tourId];
+  if (!t) return;
+
+  const pax = parseInt(document.getElementById('gq-pax').value);
+  const tier = document.getElementById('gq-tier').value;
+  const startDate = document.getElementById('gq-startDate').value;
+  const customer = document.getElementById('gq-customer').value.trim() || 'TBD';
+  const currency = document.getElementById('gq-currency').value;
+
+  const pricePerPax = t.priceGrid?.[tier]?.[pax] || 0;
+  const hotelLabel = t.hotelTiers?.find(h => h.key === tier)?.label || tier;
+
+  // Build quote payload — format that QuoteBuilder can recognize
+  const quotePayload = {
+    source: 'TourCatalog',
+    tourCode: t.code,
+    tourName: t.name,
+    tourId: t.id,
+    customer,
+    startDate,
+    days: t.days,
+    pax,
+    hotelTier: hotelLabel,
+    currency,
+    pricePerPax,
+    totalRevenue: pricePerPax * pax,
+    itinerary: t.itinerary,
+    included: t.included,
+    excluded: t.excluded,
+    notes: t.notes,
+    region: t.region,
+    type: t.type,
+    generatedAt: new Date().toISOString()
+  };
+
+  // Save payload to localStorage where QuoteBuilder can pick it up
+  try {
+    localStorage.setItem('qb_pending_import', JSON.stringify(quotePayload));
+  } catch (e) {
+    toast('Không thể chuẩn bị data: ' + e.message, 'error');
+    return;
+  }
+
+  closeGenQuote();
+
+  // Show success + instructions
+  toast('✓ Quote payload đã sẵn sàng', 'success');
+
+  // Open QuoteBuilder
+  setTimeout(() => {
+    openConfirm(
+      '🚀 Mở QuoteBuilder?',
+      `Data đã chuẩn bị: ${t.code} · ${pax} pax · ${hotelLabel} · ${currency} ${pricePerPax}/pax. QuoteBuilder sẽ tự nhận data này khi mở. Nếu QuoteBuilder mở ở tab khác, mở thủ công và bấm "Import từ Catalog".`,
+      () => {
+        // Try to open QuoteBuilder in new tab
+        window.open('bao_gia_tour_inbound.html', '_blank');
+      }
+    );
+    document.getElementById('confirm-ok').textContent = '🚀 Mở QuoteBuilder';
+    document.getElementById('confirm-ok').className = 'btn primary';
+  }, 300);
+}
+
+// ============================================================
+// EXPORT BROCHURE (basic PDF print)
+// ============================================================
+function exportTourBrochure(id) {
+  const t = db.tours[id];
+  if (!t) return;
+  window.print(); // browser will print the detail page
+  toast('Tip: Trong dialog in, chọn "Save as PDF" để xuất brochure', 'success');
+}
+
+// ============================================================
+// IMPORT / EXPORT
+// ============================================================
+function exportData() {
+  const stamp = new Date().toISOString().slice(0,10);
+  const payload = {
+    version: 1,
+    exported: new Date().toISOString(),
+    tours: db.tours
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tourcatalog-backup-${stamp}.json`;
+  a.click();
+  toast('✓ Đã xuất backup', 'success');
+}
+
+function importData() {
+  document.getElementById('fileImport').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload.tours) return toast('File không hợp lệ', 'error');
+      openConfirm('Khôi phục dữ liệu',
+        `Sẽ thay thế ${Object.keys(db.tours).length} tour hiện tại bằng ${Object.keys(payload.tours).length} tour từ file. Tiếp tục?`,
+        () => {
+          db.tours = payload.tours;
+          saveDB();
+          render();
+          toast('✓ Đã khôi phục ' + Object.keys(payload.tours).length + ' tour', 'success');
+        }
+      );
+    } catch (err) {
+      toast('Lỗi đọc file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// SEED — 5 sample inbound tours
+// ============================================================
+function loadSamples() {
+  openConfirm('Nạp tour mẫu',
+    'Sẽ thêm 5 tour inbound VN phổ biến vào catalog. Tour hiện tại không bị xoá. Tiếp tục?',
+    () => {
+      const samples = getSampleTours();
+      let added = 0;
+      samples.forEach(t => {
+        if (Object.values(db.tours).some(x => x.code === t.code)) return;
+        const id = genId();
+        db.tours[id] = { ...t, id, created: new Date().toISOString(), updated: new Date().toISOString() };
+        added++;
+      });
+      saveDB();
+      render();
+      toast(`✓ Đã thêm ${added} tour mẫu`, 'success');
+    }
+  );
+}
+
+function getSampleTours() {
+  const baseTiers = JSON.parse(JSON.stringify(DEFAULT_HOTEL_TIERS));
+  return [
+    {
+      code: 'VNH-14D',
+      name: 'Vietnam Highlights',
+      tagline: 'Discover Vietnam from north to south in 14 unforgettable days',
+      region: 'Toàn quốc',
+      type: 'Classic',
+      days: 14,
+      minPax: 2,
+      maxPax: 16,
+      currency: 'USD',
+      paxTiers: [2, 4, 6, 10, 15],
+      hotelTiers: baseTiers,
+      priceGrid: {
+        '3star': { 2: 1450, 4: 1150, 6: 1020, 10: 880, 15: 780 },
+        '4star': { 2: 1850, 4: 1450, 6: 1280, 10: 1100, 15: 980 },
+        '5star': { 2: 2400, 4: 1900, 6: 1700, 10: 1450, 15: 1290 }
+      },
+      priceNote: 'Giá net per pax in DBL/TWN. Single supplement: $35-65/đêm.',
+      description: 'A comprehensive journey covering Vietnam from the ancient streets of Hanoi to the bustling metropolis of Ho Chi Minh City. Includes the UNESCO sites of Ha Long Bay, the imperial city of Hue, the lantern-lit town of Hoi An, and the verdant Mekong Delta.',
+      itinerary: [
+        { title: 'Arrival in Hanoi', desc: 'Welcome at Noi Bai airport, transfer to hotel. Free time to explore the Old Quarter at your own pace.', meals: 'Welcome dinner' },
+        { title: 'Hanoi City Tour', desc: 'Visit Ho Chi Minh Mausoleum, Temple of Literature, Old Quarter walking tour, evening water puppet show.', meals: 'B, L' },
+        { title: 'Hanoi → Halong Bay Cruise', desc: 'Transfer to Halong, board cruise. Kayaking, swimming, sunset on deck.', meals: 'B, L, D' },
+        { title: 'Halong Bay → Hanoi → Flight to Hue', desc: 'Tai chi at sunrise, cave exploration, brunch on board. Transfer to Hanoi airport, evening flight to Hue.', meals: 'B, L' },
+        { title: 'Hue Imperial City', desc: 'Dragon boat on Perfume River, Thien Mu Pagoda, Imperial Citadel, Tu Duc tomb. Local food tour evening.', meals: 'B, L' },
+        { title: 'Hue → Hoi An (via Hai Van Pass)', desc: 'Scenic drive over Hai Van Pass, stop at Lang Co beach, arrive Hoi An mid-afternoon.', meals: 'B' },
+        { title: 'Hoi An Ancient Town', desc: 'Old Town walking tour, Japanese Bridge, tailor shop visits, free evening at lantern festival.', meals: 'B, L' },
+        { title: 'Hoi An Cooking Class & Free Day', desc: 'Morning cooking class in Tra Que village (optional). Free afternoon for tailoring, beach or My Son ruins.', meals: 'B, L' },
+        { title: 'Hoi An → Flight to Saigon', desc: 'Morning leisure, transfer to Da Nang airport, flight to Ho Chi Minh City.', meals: 'B' },
+        { title: 'Saigon City Tour', desc: 'War Remnants Museum, Reunification Palace, Notre Dame Cathedral, Central Post Office, Chinatown food tour.', meals: 'B, L' },
+        { title: 'Cu Chi Tunnels & Saigon', desc: 'Morning Cu Chi tunnels excursion, afternoon free, evening rooftop dinner.', meals: 'B, L' },
+        { title: 'Saigon → Mekong Delta', desc: 'Transfer to Ben Tre, sampan boat trip, coconut candy workshop, lunch at local home.', meals: 'B, L' },
+        { title: 'Mekong → Can Tho', desc: 'Floating villages, Cai Rang floating market at sunrise, transfer to Can Tho.', meals: 'B, L' },
+        { title: 'Mekong → Saigon → Departure', desc: 'Morning leisure in Can Tho, transfer back to Saigon, departure.', meals: 'B' }
+      ],
+      included: '- 13 nights accommodation in selected hotel class\n- Daily breakfast, lunches and dinners as per itinerary\n- All entrance fees and excursions\n- All transfers and transportation\n- English-speaking guide throughout\n- Halong Bay cruise (deluxe cabin)\n- Domestic flights (HAN-HUE, DAD-SGN)\n- Travel insurance',
+      excluded: '- International flights\n- Vietnam visa (e-visa available)\n- Beverages (alcoholic, soft drinks)\n- Personal expenses\n- Tips for guides and drivers ($5-7/day suggested)\n- Optional activities',
+      notes: 'Best season: October-April. Tour can be customized to include Sapa (+3 days) or Phu Quoc beach extension (+4 days).'
+    },
+    {
+      code: 'NL-7D',
+      name: 'Northern Vietnam Loop',
+      tagline: 'Hanoi → Halong → Sapa → Hanoi in one classic week',
+      region: 'Miền Bắc',
+      type: 'Classic',
+      days: 7,
+      minPax: 2,
+      maxPax: 16,
+      currency: 'USD',
+      paxTiers: [2, 4, 6, 10, 15],
+      hotelTiers: baseTiers,
+      priceGrid: {
+        '3star': { 2: 780, 4: 620, 6: 540, 10: 470, 15: 420 },
+        '4star': { 2: 980, 4: 780, 6: 680, 10: 590, 15: 530 },
+        '5star': { 2: 1320, 4: 1050, 6: 920, 10: 800, 15: 720 }
+      },
+      priceNote: 'Sapa overnight train upgrade: +$25/pax.',
+      description: 'The classic Northern Vietnam loop covering Hanoi cultural sites, the natural wonder of Halong Bay, and the ethnic minority villages around Sapa.',
+      itinerary: [
+        { title: 'Arrival Hanoi', desc: 'Airport pickup, hotel check-in, free time.', meals: 'Welcome drinks' },
+        { title: 'Hanoi City Tour', desc: 'Old Quarter, Temple of Literature, water puppet show.', meals: 'B, L' },
+        { title: 'Halong Bay Cruise', desc: 'Day cruise + overnight on boat in Lan Ha Bay.', meals: 'B, L, D' },
+        { title: 'Halong → Hanoi → Night train Sapa', desc: 'Morning kayak, transfer Hanoi, evening overnight train.', meals: 'B, L' },
+        { title: 'Sapa Trekking', desc: 'Trek to Cat Cat or Lao Chai village, lunch with H\'mong family.', meals: 'B, L' },
+        { title: 'Sapa → Hanoi', desc: 'Morning Fansipan cable car (optional), train back to Hanoi.', meals: 'B' },
+        { title: 'Departure', desc: 'Free morning, airport transfer.', meals: 'B' }
+      ],
+      included: '- 6 nights accommodation\n- All meals as per itinerary\n- Halong Bay cruise (deluxe)\n- Sapa overnight train (4-berth cabin)\n- English-speaking guide\n- All transfers',
+      excluded: '- International flights\n- Vietnam visa\n- Beverages\n- Tips and personal expenses',
+      notes: 'Sapa best March-May, September-November. Avoid heavy rain June-August.'
+    },
+    {
+      code: 'MK-3D',
+      name: 'Mekong Delta Discovery',
+      tagline: '3 days through the watery world of southern Vietnam',
+      region: 'Miền Nam',
+      type: 'Cultural',
+      days: 3,
+      minPax: 2,
+      maxPax: 12,
+      currency: 'USD',
+      paxTiers: [2, 4, 6, 10],
+      hotelTiers: [
+        { key: '3star', label: '3*',    color: 'tier-3' },
+        { key: '4star', label: '4*',    color: 'tier-4' },
+        { key: 'home',  label: 'Homestay', color: 'tier-lux' }
+      ],
+      priceGrid: {
+        '3star': { 2: 320, 4: 270, 6: 240, 10: 210 },
+        '4star': { 2: 420, 4: 360, 6: 320, 10: 280 },
+        'home':  { 2: 290, 4: 240, 6: 210, 10: 180 }
+      },
+      priceNote: 'Homestay option includes traditional dinner with host family.',
+      description: 'Explore the lush waterways of the Mekong Delta, visit floating markets, coconut candy workshops, and experience the unique river culture of southern Vietnam.',
+      itinerary: [
+        { title: 'Saigon → Ben Tre', desc: 'Transfer to Ben Tre province, sampan boat, coconut candy workshop, lunch at orchard.', meals: 'L, D' },
+        { title: 'Ben Tre → Can Tho', desc: 'Visit brick kilns, local markets, transfer to Can Tho, sunset on Cai Rang river.', meals: 'B, L' },
+        { title: 'Cai Rang Floating Market → Saigon', desc: 'Sunrise floating market, rice noodle factory, return Saigon by 2pm.', meals: 'B' }
+      ],
+      included: '- 2 nights accommodation\n- All meals listed\n- Boat trips\n- English-speaking guide\n- Private transport',
+      excluded: '- International flights\n- Vietnam visa\n- Drinks and tips',
+      notes: 'Operates daily year-round. Best to depart Saigon by 7:30am.'
+    },
+    {
+      code: 'CT-5D',
+      name: 'Central Vietnam Essence',
+      tagline: 'Hue imperial heritage + Hoi An lantern magic in 5 days',
+      region: 'Miền Trung',
+      type: 'Cultural',
+      days: 5,
+      minPax: 2,
+      maxPax: 14,
+      currency: 'USD',
+      paxTiers: [2, 4, 6, 10, 15],
+      hotelTiers: baseTiers,
+      priceGrid: {
+        '3star': { 2: 580, 4: 460, 6: 410, 10: 360, 15: 320 },
+        '4star': { 2: 720, 4: 580, 6: 510, 10: 440, 15: 390 },
+        '5star': { 2: 980, 4: 780, 6: 690, 10: 600, 15: 540 }
+      },
+      priceNote: 'Add Da Nang beach day: +$80/pax. Add My Son half-day: +$45/pax.',
+      description: 'A focused exploration of central Vietnam covering Hue\'s royal heritage, the Hai Van Pass scenic drive, and Hoi An\'s ancient town and beach.',
+      itinerary: [
+        { title: 'Arrival Hue', desc: 'Da Nang airport pickup, transfer to Hue. Dragon boat on Perfume River.', meals: 'Welcome dinner' },
+        { title: 'Hue Heritage Day', desc: 'Imperial Citadel, Tu Duc tomb, Thien Mu pagoda, local food evening.', meals: 'B, L' },
+        { title: 'Hue → Hoi An (Hai Van Pass)', desc: 'Scenic drive over Hai Van Pass, beach stop, arrive Hoi An.', meals: 'B' },
+        { title: 'Hoi An Ancient Town', desc: 'Old Town walking tour, cooking class, free evening at lantern festival.', meals: 'B, L' },
+        { title: 'Departure', desc: 'Free morning, transfer Da Nang airport.', meals: 'B' }
+      ],
+      included: '- 4 nights accommodation\n- Meals as listed\n- Hue Imperial sites\n- Hoi An cooking class\n- Private transport with English guide',
+      excluded: '- International/domestic flights\n- Vietnam visa\n- Tailoring costs (optional)\n- Drinks and tips',
+      notes: 'Tour can extend +1 day My Son sanctuary (UNESCO). Beach extension available at An Bang.'
+    },
+    {
+      code: 'HM-10D',
+      name: 'Vietnam Honeymoon Romance',
+      tagline: 'A romantic 10-day journey from northern lakes to tropical Phu Quoc',
+      region: 'Toàn quốc',
+      type: 'Honeymoon',
+      days: 10,
+      minPax: 2,
+      maxPax: 2,
+      currency: 'USD',
+      paxTiers: [2],
+      hotelTiers: [
+        { key: '4star', label: '4* Boutique', color: 'tier-4' },
+        { key: '5star', label: '5* Premium',  color: 'tier-5' },
+        { key: 'lux',   label: 'Luxury+',     color: 'tier-lux' }
+      ],
+      priceGrid: {
+        '4star': { 2: 2280 },
+        '5star': { 2: 3450 },
+        'lux':   { 2: 4980 }
+      },
+      priceNote: 'Includes 1 spa treatment for couple, romantic dinner setup, sparkling wine on arrival.',
+      description: 'Designed for honeymooners, this curated journey combines Hanoi\'s charm, an overnight cruise in private cabin, the romantic atmosphere of Hoi An lanterns, and 4 nights in a Phu Quoc beach resort.',
+      itinerary: [
+        { title: 'Arrival Hanoi — Welcome', desc: 'Airport pickup, transfer to boutique hotel in Old Quarter. Welcome champagne in room.', meals: 'Welcome champagne' },
+        { title: 'Hanoi Romance Day', desc: 'Lake walk, French quarter, sunset rooftop drinks, evening street food tour.', meals: 'B' },
+        { title: 'Halong Bay Private Cabin Cruise', desc: 'Transfer to Halong, board cruise. Private deck dinner, kayaking together.', meals: 'B, L, D' },
+        { title: 'Halong → Hanoi → Flight Da Nang → Hoi An', desc: 'Morning Tai chi, brunch. Transfer Hanoi airport, flight Da Nang, transfer Hoi An.', meals: 'B, L' },
+        { title: 'Hoi An Magic', desc: 'Lantern-making workshop, romantic boat ride at sunset, fine dining.', meals: 'B, D' },
+        { title: 'Hoi An Spa & Beach', desc: 'Couples spa treatment, free afternoon at An Bang beach.', meals: 'B' },
+        { title: 'Hoi An → Da Nang → Flight Phu Quoc', desc: 'Transfer to Da Nang airport, flight to Phu Quoc, check-in beachfront resort.', meals: 'B' },
+        { title: 'Phu Quoc Beach Day', desc: 'Free day at resort. Optional: snorkeling, fishing village, night market.', meals: 'B' },
+        { title: 'Phu Quoc Free Day', desc: 'Beach, spa, sunset dinner on the beach.', meals: 'B, romantic dinner' },
+        { title: 'Departure', desc: 'Free morning, airport transfer.', meals: 'B' }
+      ],
+      included: '- 9 nights premium accommodation\n- All meals listed + romantic dinner\n- Halong private cabin cruise\n- Couples spa treatment\n- Domestic flights\n- English-speaking guide\n- All transfers in private car',
+      excluded: '- International flights\n- Vietnam visa\n- Optional activities\n- Tips and personal expenses',
+      notes: 'Best months: Oct-April. Phu Quoc can be substituted with Con Dao or Nha Trang on request. Anniversary cake, flowers, room decoration available on request.'
+    }
+  ];
+}
+
+// ============================================================
+// CONFIRM DIALOG
+// ============================================================
+function openConfirm(title, msg, callback) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  confirmCallback = callback;
+  document.getElementById('confirm-backdrop').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirm-backdrop').classList.remove('show');
+  // Reset confirm button to default
+  document.getElementById('confirm-ok').textContent = 'Xác nhận';
+  document.getElementById('confirm-ok').className = 'btn danger';
+  confirmCallback = null;
+}
+document.getElementById('confirm-ok').onclick = () => {
+  if (confirmCallback) confirmCallback();
+  closeConfirm();
+};
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) {
+  return String(s ?? '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('confirm-backdrop').classList.contains('show')) closeConfirm();
+    else if (document.getElementById('gen-quote-backdrop').classList.contains('show')) closeGenQuote();
+    else if (document.getElementById('modal-backdrop').classList.contains('show')) closeModal();
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  render();
+});
+</script>
+</body>
+</html>

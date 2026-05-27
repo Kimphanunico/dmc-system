@@ -1,0 +1,2866 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SupplierHub — Quản lý Nhà cung cấp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --paper: #ffffff;
+    --ink: #0f1418;
+    --ink-soft: #4a5560;
+    --line: #e6e4dd;
+    --line-strong: #d4d0c4;
+    --accent: #c2410c;
+    --accent-soft: #fff1ea;
+    --section: #f4f2eb;
+    --shadow: 0 1px 0 rgba(15,20,24,.04), 0 8px 24px -8px rgba(15,20,24,.08);
+
+    --cat-hotel: #1e40af;
+    --cat-hotel-soft: #eff6ff;
+    --cat-cruise: #0f766e;
+    --cat-cruise-soft: #f0fdfa;
+    --cat-xe: #b45309;
+    --cat-xe-soft: #fef7ed;
+    --cat-land: #065f46;
+    --cat-land-soft: #ecfdf5;
+    --cat-nh: #991b1b;
+    --cat-nh-soft: #fef2f2;
+    --cat-tq: #6b21a8;
+    --cat-tq-soft: #faf5ff;
+    --cat-hdv: #be185d;
+    --cat-hdv-soft: #fdf2f8;
+    --cat-bh: #475569;
+    --cat-bh-soft: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  /* ===== App Nav ===== */
+  .appnav {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 1px 0 rgba(15,20,24,.03);
+  }
+  .logo {
+    font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: 17px; letter-spacing: -.02em;
+  }
+  .logo span { color: var(--accent); }
+  .crumbs {
+    font-size: 12px; color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    flex: 1;
+  }
+  .crumbs strong { color: var(--ink); }
+  .crumbs a { color: var(--ink-soft); text-decoration: none; cursor: pointer; }
+  .crumbs a:hover { color: var(--accent); }
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--paper);
+    color: var(--ink); padding: 7px 12px; font-size: 12px;
+    font-weight: 500; border-radius: 7px; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--section); border-color: var(--ink-soft); }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.primary:hover { background: #000; }
+  .btn.danger { color: var(--cat-nh); border-color: #fecaca; background: var(--cat-nh-soft); }
+  .btn.danger:hover { background: #fde7e7; }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+  .btn.ghost:hover { background: var(--section); color: var(--ink); }
+  .btn.sm { padding: 4px 9px; font-size: 11px; }
+  .btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.accent:hover { background: #9a3208; }
+
+  /* ===== Layout ===== */
+  .wrap { display: flex; min-height: calc(100vh - 53px); }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 240px;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    padding: 18px 12px;
+    flex-shrink: 0;
+  }
+  .sb-title {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--ink-soft);
+    padding: 6px 10px; margin-bottom: 4px;
+  }
+  .sb-subtitle {
+    font-size: 10px; color: var(--ink-soft);
+    padding: 0 10px 6px;
+    font-style: italic;
+    line-height: 1.3;
+    opacity: .75;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 7px;
+    cursor: pointer; transition: all .12s;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+  .sb-item:hover { background: var(--section); }
+  .sb-item.active { background: var(--ink); color: #fff; }
+  .sb-item .ico { font-size: 14px; }
+  .sb-item .count {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--ink-soft);
+    background: var(--section); padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .sb-item.active .count { background: rgba(255,255,255,.15); color: rgba(255,255,255,.85); }
+
+  /* Category indicator dots */
+  .cat-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cat-dot.cat-all { background: linear-gradient(135deg, var(--cat-hotel), var(--cat-nh)); }
+  .cat-dot.cat-hotel { background: var(--cat-hotel); }
+  .cat-dot.cat-cruise { background: var(--cat-cruise); }
+  .cat-dot.cat-xe { background: var(--cat-xe); }
+  .cat-dot.cat-land { background: var(--cat-land); }
+  .cat-dot.cat-nh { background: var(--cat-nh); }
+  .cat-dot.cat-tq { background: var(--cat-tq); }
+  .cat-dot.cat-hdv { background: var(--cat-hdv); }
+  .cat-dot.cat-bh { background: var(--cat-bh); }
+
+  /* ===== Main ===== */
+  .main {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-x: auto;
+  }
+
+  /* ===== Page header ===== */
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 18px;
+    gap: 24px;
+  }
+  .page-title {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 26px; letter-spacing: -.025em;
+    margin: 0 0 4px; line-height: 1.1;
+  }
+  .page-subtitle {
+    color: var(--ink-soft); font-size: 13px;
+  }
+  .page-actions { display: flex; gap: 8px; }
+
+  /* ===== Toolbar ===== */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .search-input {
+    flex: 1; min-width: 220px;
+    border: 1px solid var(--line-strong); padding: 7px 11px;
+    border-radius: 7px; font-family: inherit; font-size: 12.5px;
+    background: var(--bg); outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); background: var(--paper); }
+  select.filter-select {
+    border: 1px solid var(--line-strong);
+    padding: 6px 10px;
+    border-radius: 7px;
+    font-family: inherit; font-size: 12px;
+    background: var(--paper); cursor: pointer; outline: none;
+  }
+  select.filter-select:focus { border-color: var(--accent); }
+
+  /* ===== Stats strip ===== */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat {
+    padding: 14px 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .stat-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-soft); font-weight: 600; margin-bottom: 4px;
+  }
+  .stat-val {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 24px; letter-spacing: -.02em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-sub { font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+
+  /* ===== Table ===== */
+  .table-wrap {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  table.suppliers {
+    width: 100%; border-collapse: collapse;
+  }
+  table.suppliers thead th {
+    background: var(--section);
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: .04em;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+    position: sticky; top: 0;
+  }
+  table.suppliers thead th.num { text-align: right; }
+  table.suppliers tbody td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    vertical-align: middle;
+  }
+  table.suppliers tbody tr {
+    cursor: pointer;
+    transition: background .12s;
+  }
+  table.suppliers tbody tr:hover { background: #fbfaf5; }
+  table.suppliers tbody tr:last-child td { border-bottom: none; }
+  table.suppliers td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .code-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 7px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .cat-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .cat-badge.cat-hotel { background: var(--cat-hotel-soft); color: var(--cat-hotel); }
+  .cat-badge.cat-cruise { background: var(--cat-cruise-soft); color: var(--cat-cruise); }
+  .cat-badge.cat-xe { background: var(--cat-xe-soft); color: var(--cat-xe); }
+  .cat-badge.cat-land { background: var(--cat-land-soft); color: var(--cat-land); }
+  .cat-badge.cat-nh { background: var(--cat-nh-soft); color: var(--cat-nh); }
+  .cat-badge.cat-tq { background: var(--cat-tq-soft); color: var(--cat-tq); }
+  .cat-badge.cat-hdv { background: var(--cat-hdv-soft); color: var(--cat-hdv); }
+  .cat-badge.cat-bh { background: var(--cat-bh-soft); color: var(--cat-bh); }
+
+  .region-tag {
+    font-size: 11px; color: var(--ink-soft);
+    background: var(--section);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .star {
+    color: #f59e0b; letter-spacing: -1px;
+  }
+  .row-actions {
+    display: flex; gap: 4px;
+    opacity: 0; transition: opacity .12s;
+  }
+  table.suppliers tbody tr:hover .row-actions { opacity: 1; }
+
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .empty-state h3 {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    margin: 0 0 6px; color: var(--ink); font-size: 20px;
+  }
+  .empty-state p { margin: 0 0 18px; font-size: 13px; }
+
+  /* ===== Modal (drawer slide from right) ===== */
+  .drawer-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,20,24,.45);
+    display: none;
+    z-index: 1000;
+  }
+  .drawer-backdrop.show { display: block; }
+  .drawer {
+    position: fixed; top: 0; right: 0;
+    width: 560px; max-width: 100vw;
+    height: 100vh;
+    background: var(--paper);
+    box-shadow: -20px 0 60px -10px rgba(0,0,0,.2);
+    transform: translateX(100%);
+    transition: transform .25s ease-out;
+    display: flex; flex-direction: column;
+    z-index: 1001;
+  }
+  .drawer.show { transform: translateX(0); }
+  .drawer-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  .drawer-head h2 {
+    margin: 0; font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 20px; letter-spacing: -.02em;
+  }
+  .drawer-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .drawer-foot {
+    padding: 14px 24px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: flex-end; gap: 8px;
+    background: var(--section);
+    flex-shrink: 0;
+  }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .form-field {
+    display: flex; flex-direction: column;
+    gap: 5px;
+  }
+  .form-field.span-2 { grid-column: span 2; }
+  .form-field label {
+    font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--ink-soft); font-weight: 600;
+  }
+  .form-field label .req { color: var(--cat-nh); margin-left: 2px; }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    border: 1px solid var(--line-strong);
+    padding: 8px 11px;
+    border-radius: 7px;
+    font-family: inherit; font-size: 13px;
+    background: var(--paper); outline: none;
+    transition: border-color .12s;
+  }
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-field textarea {
+    resize: vertical; min-height: 60px;
+  }
+  .form-field .hint {
+    font-size: 10.5px; color: var(--ink-soft);
+    font-style: italic;
+  }
+  .form-field .hint.code-hint {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent); font-style: normal;
+  }
+
+  .section-divider {
+    grid-column: span 2;
+    margin: 10px 0 -4px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-soft);
+  }
+
+  /* Star rating input */
+  .star-input {
+    display: flex; gap: 2px;
+    font-size: 22px; cursor: pointer;
+    color: #d4d0c4;
+    user-select: none;
+  }
+  .star-input span { transition: color .1s; }
+  .star-input span:hover,
+  .star-input span.active { color: #f59e0b; }
+
+  /* ===== Section: Catalog placeholder (Phase 2) ===== */
+  .coming-soon {
+    padding: 80px 40px;
+    text-align: center;
+    background: var(--paper);
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+  }
+  .coming-soon-icon {
+    font-size: 48px; margin-bottom: 16px;
+    opacity: .4;
+  }
+  .coming-soon h2 {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 24px; letter-spacing: -.02em;
+    margin: 0 0 8px;
+  }
+  .coming-soon p {
+    color: var(--ink-soft); font-size: 14px;
+    max-width: 500px; margin: 0 auto 20px;
+    line-height: 1.55;
+  }
+
+  /* Confirm dialog */
+  .confirm-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15,20,24,.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; padding: 20px;
+  }
+  .confirm-backdrop.show { display: flex; }
+  .confirm-box {
+    background: var(--paper); border-radius: 12px;
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,.3);
+    max-width: 420px; width: 100%;
+    overflow: hidden;
+  }
+  .confirm-head {
+    padding: 18px 22px 12px;
+  }
+  .confirm-head h3 {
+    margin: 0 0 4px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 18px;
+  }
+  .confirm-head p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+  .confirm-foot {
+    padding: 14px 22px;
+    display: flex; gap: 8px; justify-content: flex-end;
+    background: var(--section);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--ink); color: #fff;
+    padding: 12px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,.4);
+    transform: translateY(100px); opacity: 0;
+    transition: all .25s ease-out;
+    z-index: 3000;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #065f46; }
+  .toast.error { background: #991b1b; }
+
+  /* ===== Bulk Import Drawer ===== */
+  .drawer.bulk-drawer { width: 720px; }
+
+  .bulk-tabs {
+    display: flex; gap: 4px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .bulk-tab {
+    border: none; background: transparent;
+    padding: 9px 14px;
+    font-family: inherit; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-soft); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .12s;
+    border-radius: 0;
+  }
+  .bulk-tab:hover { color: var(--ink); background: var(--section); }
+  .bulk-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .hint-box {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .hint-box strong { color: var(--accent); }
+  .hint-box ol {
+    margin: 6px 0 6px 18px;
+    padding: 0;
+  }
+  .hint-box li { margin-bottom: 3px; }
+  .hint-box code {
+    background: rgba(194,65,12,.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .hint-box p { margin: 4px 0 0; font-size: 12px; color: var(--ink-soft); }
+  .hint-box a { color: var(--accent); text-decoration: underline; }
+
+  .bulk-textarea {
+    width: 100%;
+    min-height: 180px;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    padding: 11px 13px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    resize: vertical;
+  }
+  .bulk-textarea:focus { border-color: var(--accent); }
+
+  .bulk-actions {
+    display: flex; gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .bulk-actions a.btn {
+    text-decoration: none;
+    color: var(--ink);
+    display: inline-flex; align-items: center;
+  }
+
+  .prompt-cat-select {
+    margin-bottom: 14px;
+  }
+  .prompt-cat-select label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    color: var(--ink-soft); text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+  .prompt-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .prompt-cat-btn {
+    padding: 8px 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper);
+    border-radius: 7px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; text-align: center;
+    transition: all .12s;
+    color: var(--ink);
+  }
+  .prompt-cat-btn:hover {
+    background: var(--section);
+    border-color: var(--ink-soft);
+  }
+  .prompt-cat-btn.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  /* Preview list */
+  .preview-list {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: var(--paper);
+  }
+  .preview-row {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12.5px;
+  }
+  .preview-row:last-child { border-bottom: none; }
+  .preview-row.error { background: #fef2f2; }
+  .preview-row.duplicate { background: #fef7ed; }
+  .preview-row .pv-status {
+    width: 22px; height: 22px;
+    border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .preview-row.ok .pv-status { background: #d1fae5; color: #065f46; }
+  .preview-row.duplicate .pv-status { background: #fed7aa; color: #9a3412; }
+  .preview-row.error .pv-status { background: #fecaca; color: #991b1b; }
+  .preview-row .pv-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 6px;
+    border-radius: 4px;
+    min-width: 90px; text-align: center;
+  }
+  .preview-row .pv-name { flex: 1; font-weight: 500; }
+  .preview-row .pv-cat {
+    font-size: 11px; color: var(--ink-soft);
+  }
+  .preview-row .pv-error-msg {
+    color: #991b1b; font-size: 11px;
+  }
+  .preview-summary {
+    padding: 10px 12px;
+    background: var(--section);
+    border-radius: 7px;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .preview-summary strong { color: var(--ink); }
+  .preview-summary .ps-ok { color: #065f46; }
+  .preview-summary .ps-dup { color: #9a3412; }
+  .preview-summary .ps-err { color: #991b1b; }
+
+  /* ===== Attachments — multi-file with 3 types ===== */
+  .attachments-list {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+    min-height: 40px;
+  }
+  .attach-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px; font-style: italic;
+    background: var(--section);
+    border-radius: 7px;
+    border: 1px dashed var(--line-strong);
+  }
+  .attach-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    transition: border-color .12s;
+  }
+  .attach-item:hover { border-color: var(--line-strong); }
+  .attach-icon {
+    font-size: 20px; flex-shrink: 0;
+    width: 28px; text-align: center;
+    padding-top: 4px;
+  }
+  .attach-info {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .attach-label, .attach-value {
+    border: 1px solid var(--line);
+    padding: 6px 9px;
+    border-radius: 5px;
+    font-family: inherit; font-size: 12px;
+    background: var(--bg); outline: none;
+    width: 100%;
+  }
+  .attach-label { font-weight: 600; }
+  .attach-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .attach-label:focus, .attach-value:focus {
+    border-color: var(--accent); background: var(--paper);
+  }
+  .attach-meta {
+    font-size: 10.5px; color: var(--ink-soft);
+    padding-left: 2px;
+  }
+  .attach-type {
+    display: inline-block;
+    padding: 1px 6px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .attach-actions-row {
+    display: flex; gap: 4px;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+  .attach-actions {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 4px;
+  }
+
+  /* Attachment badge in table */
+  .attach-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 4px;
+    font-size: 10.5px; font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .12s;
+    margin-left: 6px;
+  }
+  .attach-badge:hover {
+    border-color: var(--accent);
+    background: #ffe5d4;
+  }
+
+  /* Attachments panel (popup) */
+  .attachments-panel {
+    background: var(--paper);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,.3);
+    max-width: 600px; width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+  }
+  .attachments-panel.show { display: flex; }
+  .ap-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .ap-head h3 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 600; font-size: 18px;
+  }
+  .ap-sub {
+    font-size: 12px; color: var(--ink-soft);
+    margin-top: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ap-list {
+    padding: 14px 22px 22px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .ap-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: var(--paper);
+  }
+  .ap-item:hover { border-color: var(--accent); }
+  .ap-icon {
+    font-size: 24px; flex-shrink: 0;
+  }
+  .ap-info {
+    flex: 1; min-width: 0;
+  }
+  .ap-label {
+    font-weight: 600; font-size: 13px;
+    color: var(--ink);
+  }
+  .ap-type {
+    font-size: 11px; color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .ap-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--accent);
+    background: var(--section);
+    padding: 4px 7px;
+    border-radius: 4px;
+    margin-top: 4px;
+    word-break: break-all;
+  }
+  .upload-zone {
+    border: none;
+  }
+  .upload-zone button[type="button"] {
+    border-style: dashed !important;
+    border-color: var(--line-strong);
+    color: var(--ink-soft);
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 12px;
+  }
+  .upload-zone button[type="button"]:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .upload-progress {
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .upload-progress .bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width .2s;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<div class="appnav">
+  <a href="index.html" class="btn ghost sm" style="margin-right:4px">🏠 Hub</a>
+  <div class="logo">Supplier<span>Hub</span></div>
+  <div class="crumbs" id="crumbs"><strong>Tất cả nhà cung cấp</strong></div>
+  <div style="display:flex; gap:8px">
+    <button class="btn accent" onclick="openBulkImport()" title="Import nhiều NCC từ AI extract hoặc Excel">⚡ Bulk Import</button>
+    <button class="btn ghost" onclick="exportData()" title="Sao lưu dữ liệu">💾 Backup</button>
+    <button class="btn ghost" onclick="importData()" title="Khôi phục từ file">📥 Restore</button>
+    <button class="btn ghost" onclick="loadSamples()" title="Nạp 20 NCC mẫu">🌱 Seed mẫu</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sb-item active" data-view="all" onclick="setView('all')">
+      <span class="cat-dot cat-all"></span>
+      <span>Tất cả</span>
+      <span class="count" id="cnt-all">0</span>
+    </div>
+
+    <div class="sb-title" style="margin-top:14px">💰 Bảng giá</div>
+    <div class="sb-subtitle">Giá nhập sẵn — tự fill khi tính tour</div>
+    <div class="sb-item" data-view="tq" onclick="setView('tq')">
+      <span class="cat-dot cat-tq"></span>
+      <span>🎫 Vé tham quan</span>
+      <span class="count" id="cnt-tq">0</span>
+    </div>
+    <div class="sb-item" data-view="bh" onclick="setView('bh')">
+      <span class="cat-dot cat-bh"></span>
+      <span>🛡️ Bảo hiểm + Khác</span>
+      <span class="count" id="cnt-bh">0</span>
+    </div>
+
+    <div class="sb-title" style="margin-top:14px">📁 Danh bạ NCC</div>
+    <div class="sb-subtitle">Liên hệ + folder Drive contract</div>
+    <div class="sb-item" data-view="hotel" onclick="setView('hotel')">
+      <span class="cat-dot cat-hotel"></span>
+      <span>🏨 Khách sạn</span>
+      <span class="count" id="cnt-hotel">0</span>
+    </div>
+    <div class="sb-item" data-view="cruise" onclick="setView('cruise')">
+      <span class="cat-dot cat-cruise"></span>
+      <span>🚢 Cruise</span>
+      <span class="count" id="cnt-cruise">0</span>
+    </div>
+    <div class="sb-item" data-view="xe" onclick="setView('xe')">
+      <span class="cat-dot cat-xe"></span>
+      <span>🚌 Vận chuyển</span>
+      <span class="count" id="cnt-xe">0</span>
+    </div>
+    <div class="sb-item" data-view="land" onclick="setView('land')">
+      <span class="cat-dot cat-land"></span>
+      <span>🌏 Land DMC</span>
+      <span class="count" id="cnt-land">0</span>
+    </div>
+    <div class="sb-item" data-view="nh" onclick="setView('nh')">
+      <span class="cat-dot cat-nh"></span>
+      <span>🍽️ Nhà hàng</span>
+      <span class="count" id="cnt-nh">0</span>
+    </div>
+
+    <div class="sb-title" style="margin-top:14px">🤝 Cộng tác viên</div>
+    <div class="sb-subtitle">Đối tác cá nhân đã làm việc</div>
+    <div class="sb-item" data-view="hdv" onclick="setView('hdv')">
+      <span class="cat-dot cat-hdv"></span>
+      <span>🎤 Hướng dẫn viên</span>
+      <span class="count" id="cnt-hdv">0</span>
+    </div>
+
+    <div class="sb-title" style="margin-top:14px">⏳ Sắp tới</div>
+    <div class="sb-item" data-view="catalog" onclick="setView('catalog')" style="opacity:.6">
+      <span style="font-size:14px">📦</span>
+      <span>Catalog Dịch vụ</span>
+    </div>
+    <div class="sb-item" data-view="tour" onclick="setView('tour')" style="opacity:.6">
+      <span style="font-size:14px">📄</span>
+      <span>Tour Template</span>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main" id="main">
+    <!-- content injected by JS -->
+  </main>
+
+</div>
+
+<!-- ===== DRAWER (Add/Edit) ===== -->
+<div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer(event)"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2 id="drawer-title">Thêm nhà cung cấp</h2>
+    <button class="btn ghost" onclick="closeDrawer()" style="font-size:18px; padding:4px 10px">×</button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <!-- form injected by JS -->
+  </div>
+  <div class="drawer-foot">
+    <button class="btn ghost" onclick="closeDrawer()">Huỷ</button>
+    <button class="btn primary" id="drawer-save" onclick="saveSupplier()">💾 Lưu</button>
+  </div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-backdrop" id="confirm-backdrop">
+  <div class="confirm-box">
+    <div class="confirm-head">
+      <h3 id="confirm-title">Xác nhận</h3>
+      <p id="confirm-msg"></p>
+    </div>
+    <div class="confirm-foot">
+      <button class="btn ghost" onclick="closeConfirm()">Huỷ</button>
+      <button class="btn danger" id="confirm-ok">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- File input -->
+<input type="file" id="fileImport" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<!-- ===== BULK IMPORT DRAWER ===== -->
+<div class="drawer-backdrop" id="bulk-backdrop" onclick="closeBulkImport(event)"></div>
+<div class="drawer bulk-drawer" id="bulk-drawer">
+  <div class="drawer-head">
+    <h2>⚡ Bulk Import — Nhập hàng loạt NCC</h2>
+    <button class="btn ghost" onclick="closeBulkImport()" style="font-size:18px; padding:4px 10px">×</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Mode tabs -->
+    <div class="bulk-tabs">
+      <button class="bulk-tab active" data-mode="json" onclick="setBulkMode('json')">
+        🤖 Paste JSON từ AI
+      </button>
+      <button class="bulk-tab" data-mode="csv" onclick="setBulkMode('csv')">
+        📋 Paste CSV / Excel
+      </button>
+      <button class="bulk-tab" data-mode="prompt" onclick="setBulkMode('prompt')">
+        📝 Lấy Prompt mẫu
+      </button>
+    </div>
+
+    <!-- JSON mode -->
+    <div class="bulk-pane" id="bulk-pane-json">
+      <div class="hint-box">
+        <strong>Cách dùng:</strong>
+        <ol>
+          <li>Vào tab <strong>📝 Lấy Prompt mẫu</strong> → copy prompt</li>
+          <li>Mở Claude/ChatGPT → paste prompt + upload file contract của NCC</li>
+          <li>AI trả về JSON → copy toàn bộ JSON</li>
+          <li>Paste vào ô bên dưới → bấm <strong>Preview</strong> → kiểm tra → <strong>Import</strong></li>
+        </ol>
+        <p>Hỗ trợ <strong>1 NCC</strong> (object <code>{}</code>) hoặc <strong>nhiều NCC</strong> (array <code>[]</code>).</p>
+      </div>
+      <textarea id="bulk-json" class="bulk-textarea" placeholder='Paste JSON từ AI ở đây, ví dụ:&#10;&#10;{&#10;  "category": "hotel",&#10;  "name": "La Siesta Premium",&#10;  "region": "Hà Nội",&#10;  ...&#10;}&#10;&#10;hoặc nhiều NCC:&#10;[ {...}, {...}, {...} ]'></textarea>
+      <div class="bulk-actions">
+        <button class="btn ghost" onclick="document.getElementById('bulk-json').value=''">🗑 Xoá</button>
+        <button class="btn ghost" onclick="loadJsonExample()">📋 Xem ví dụ JSON</button>
+        <button class="btn primary" onclick="previewBulkJson()">👁 Preview</button>
+      </div>
+    </div>
+
+    <!-- CSV mode -->
+    <div class="bulk-pane" id="bulk-pane-csv" style="display:none">
+      <div class="hint-box">
+        <strong>Cách dùng:</strong>
+        <ol>
+          <li>Mở Excel/Google Sheets với danh sách NCC của bạn</li>
+          <li>Đảm bảo có các cột bắt buộc: <code>category, name, region</code></li>
+          <li>Cột tùy chọn: <code>contactName, phone, email, vat, paymentDays, mst, rating, notes</code></li>
+          <li>Chọn toàn bộ vùng (gồm cả header) → Ctrl+C → paste vào ô dưới</li>
+        </ol>
+        <p><strong>Lưu ý:</strong> Giá trị <code>category</code> phải là: hotel, cruise, xe, land, nh, tq, hdv, bh</p>
+      </div>
+      <textarea id="bulk-csv" class="bulk-textarea" placeholder='Paste dữ liệu từ Excel ở đây. Ví dụ:&#10;&#10;category&#9;name&#9;region&#9;contactName&#9;phone&#9;vat&#10;hotel&#9;Le Jardin Hotel&#9;Hà Nội&#9;Ms. Linh&#9;0912345678&#9;8&#10;xe&#9;Hải Nam Transport&#9;Miền Bắc&#9;A. Hải&#9;0919012345&#9;8'></textarea>
+      <div class="bulk-actions">
+        <button class="btn ghost" onclick="document.getElementById('bulk-csv').value=''">🗑 Xoá</button>
+        <button class="btn ghost" onclick="loadCsvExample()">📋 Xem ví dụ CSV</button>
+        <button class="btn primary" onclick="previewBulkCsv()">👁 Preview</button>
+      </div>
+    </div>
+
+    <!-- Prompt mode -->
+    <div class="bulk-pane" id="bulk-pane-prompt" style="display:none">
+      <div class="hint-box">
+        <strong>Quy trình AI Extract (30 giây/file):</strong>
+        <ol>
+          <li>Chọn loại NCC ở dưới → bấm <strong>Copy Prompt</strong></li>
+          <li>Mở <a href="https://claude.ai" target="_blank">Claude</a> hoặc <a href="https://chatgpt.com" target="_blank">ChatGPT</a></li>
+          <li>Paste prompt + đính kèm file contract PDF/Word của NCC</li>
+          <li>AI trả về JSON → copy → quay lại tab <strong>🤖 Paste JSON</strong></li>
+        </ol>
+      </div>
+      <div class="prompt-cat-select">
+        <label>Chọn loại NCC để lấy prompt phù hợp:</label>
+        <div class="prompt-cat-grid" id="prompt-cat-grid"></div>
+      </div>
+      <textarea id="bulk-prompt" class="bulk-textarea" readonly style="font-family:'JetBrains Mono',monospace; font-size:11.5px; background:#fbfaf5"></textarea>
+      <div class="bulk-actions">
+        <button class="btn primary" onclick="copyPrompt()">📋 Copy Prompt</button>
+        <a class="btn" href="https://claude.ai/new" target="_blank">🚀 Mở Claude</a>
+        <a class="btn" href="https://chatgpt.com" target="_blank">🚀 Mở ChatGPT</a>
+      </div>
+    </div>
+
+    <!-- Preview pane (shared) -->
+    <div id="bulk-preview" style="display:none; margin-top:18px">
+      <h3 style="font-family:'Fraunces',serif; font-weight:600; font-size:16px; margin:0 0 8px">Preview — Kết quả parse</h3>
+      <div id="bulk-preview-summary"></div>
+      <div id="bulk-preview-list" class="preview-list"></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn ghost" onclick="closeBulkImport()">Huỷ</button>
+    <button class="btn primary" id="bulk-import-btn" onclick="confirmBulkImport()" style="display:none">✓ Import vào database</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA SCHEMA & CONSTANTS
+// ============================================================
+const STORAGE_KEY = 'supplierhub_v1';
+
+const CATEGORIES = {
+  hotel:  { name: 'Khách sạn',      icon: '🏨', code: 'HT', cls: 'cat-hotel',  group: 'B' },
+  cruise: { name: 'Cruise',         icon: '🚢', code: 'CR', cls: 'cat-cruise', group: 'B' },
+  xe:     { name: 'Vận chuyển',     icon: '🚌', code: 'XE', cls: 'cat-xe',     group: 'B' },
+  land:   { name: 'Land DMC',       icon: '🌏', code: 'LD', cls: 'cat-land',   group: 'C' }, // file browser
+  nh:     { name: 'Nhà hàng',       icon: '🍽️', code: 'NH', cls: 'cat-nh',     group: 'C' }, // file browser
+  tq:     { name: 'Vé tham quan',   icon: '🎫', code: 'TQ', cls: 'cat-tq',     group: 'A' },
+  hdv:    { name: 'HDV cộng tác',   icon: '🎤', code: 'HD', cls: 'cat-hdv',    group: 'A' },
+  bh:     { name: 'BH + Khác',      icon: '🛡️', code: 'BH', cls: 'cat-bh',     group: 'A' }
+};
+// Group A = Full price (auto-fill quote) · B = Contact + Drive folder · C = File browser (multiple menus/programs)
+
+const REGIONS = [
+  'Hà Nội', 'Ninh Bình', 'Hạ Long', 'Sapa', 'Mai Châu',
+  'Huế', 'Đà Nẵng', 'Hội An', 'Quy Nhơn',
+  'Nha Trang', 'Đà Lạt', 'Phú Quốc', 'Côn Đảo',
+  'HCM', 'Cần Thơ', 'Bến Tre', 'Châu Đốc', 'Tây Ninh',
+  'Miền Bắc', 'Miền Trung', 'Miền Nam', 'Toàn quốc'
+];
+
+const REGION_CODES = {
+  'Hà Nội':'HN','Ninh Bình':'NB','Hạ Long':'HL','Sapa':'SP','Mai Châu':'MC',
+  'Huế':'HU','Đà Nẵng':'DN','Hội An':'HA','Quy Nhơn':'QN',
+  'Nha Trang':'NT','Đà Lạt':'DL','Phú Quốc':'PQ','Côn Đảo':'CD',
+  'HCM':'HCM','Cần Thơ':'CT','Bến Tre':'BT','Châu Đốc':'CD','Tây Ninh':'TY',
+  'Miền Bắc':'MB','Miền Trung':'MT','Miền Nam':'MN','Toàn quốc':'VN'
+};
+
+// Category-specific extra fields
+// EXTRA_FIELDS — Hybrid Lite design
+// - Group A (tq, bh, hdv): Full price info — used directly in quote calculation
+// - Group B (hotel, cruise, xe, land, nh): Contact + Drive folder only — prices read from Drive contracts
+const EXTRA_FIELDS = {
+  // === GROUP B — Contact-only (lưu liên hệ + Drive folder, KHÔNG nhập giá) ===
+  hotel: [
+    { key: 'stars', label: 'Hạng sao', type: 'select', options: ['2*','3*','4*','5*','Luxury'], default: '4*' },
+    { key: 'roomCount', label: 'Tổng số phòng', type: 'number', placeholder: 'Tham khảo' },
+    { key: 'breakfast', label: 'Ăn sáng có sẵn', type: 'select', options: ['Không','BB','HB','FB'], default: 'BB' },
+    { key: 'driveFolderUrl', label: '📁 Link folder Drive (Contract + Rate sheet + Factsheet)', type: 'text', placeholder: 'https://drive.google.com/drive/folders/...', span2: true, isUrl: true }
+  ],
+  cruise: [
+    { key: 'stars', label: 'Hạng', type: 'select', options: ['3*','4*','5*','Luxury'], default: '5*' },
+    { key: 'nights', label: 'Số đêm gói', type: 'number', default: 2 },
+    { key: 'driveFolderUrl', label: '📁 Link folder Drive (Contract + Rate sheet + Cabin types)', type: 'text', placeholder: 'https://drive.google.com/drive/folders/...', span2: true, isUrl: true }
+  ],
+  xe: [
+    { key: 'vehicleTypes', label: 'Loại xe có sẵn', type: 'text', placeholder: 'Sedan 4 / Innova 7 / Bus 16-45' },
+    { key: 'driverEN', label: 'Tài xế tiếng Anh', type: 'select', options: ['Có','Không','Một số'], default: 'Không' },
+    { key: 'driveFolderUrl', label: '📁 Link folder Drive (Báo giá xe + tuyến)', type: 'text', placeholder: 'https://drive.google.com/drive/folders/...', span2: true, isUrl: true }
+  ],
+  land: [
+    { key: 'specialty', label: 'Chuyên về', type: 'text', placeholder: 'Mekong / Cooking / City tour / Trekking...' },
+    { key: 'language', label: 'Ngôn ngữ HDV chính', type: 'select', options: ['EN','FR','DE','ES','IT','JP','KR','CN','EN/FR','Multi'], default: 'EN' },
+    { key: 'mainFolderUrl', label: '📁 Folder Drive chính (chứa tất cả chương trình)', type: 'text', placeholder: 'https://drive.google.com/drive/folders/... (optional)', span2: true, isUrl: true }
+  ],
+  nh: [
+    { key: 'cuisine', label: 'Loại món', type: 'select', options: ['VN truyền thống','Hải sản','Buffet','Á-Âu','Chay','Đặc sản vùng','Set khách Tây','Mixed'], default: 'VN truyền thống' },
+    { key: 'capacity', label: 'Sức chứa (khách)', type: 'number' },
+    { key: 'hasVIP', label: 'Có phòng VIP', type: 'select', options: ['Có','Không'], default: 'Không' },
+    { key: 'mainFolderUrl', label: '📁 Folder Drive chính (chứa tất cả menu)', type: 'text', placeholder: 'https://drive.google.com/drive/folders/... (optional)', span2: true, isUrl: true }
+  ],
+
+  // === GROUP A — Full price (nhập giá đầy đủ, auto-fill khi tính tour) ===
+  tq: [
+    { key: 'type', label: 'Loại', type: 'select', options: ['Danh thắng','Di tích','Bảo tàng','Công viên','Show diễn','Cảnh quan','Khác'], default: 'Danh thắng' },
+    { key: 'priceAdult2026', label: 'Vé adult 2026 (VNĐ)', type: 'number', isPrice: true },
+    { key: 'priceChild2026', label: 'Vé child 2026 (VNĐ)', type: 'number', isPrice: true },
+    { key: 'priceAdult2027', label: 'Vé adult 2027 (VNĐ)', type: 'number', isPrice: true, placeholder: 'Để trống nếu chưa có' },
+    { key: 'priceChild2027', label: 'Vé child 2027 (VNĐ)', type: 'number', isPrice: true, placeholder: 'Để trống nếu chưa có' },
+    { key: 'childAge', label: 'Trẻ em tuổi', type: 'text', placeholder: 'VD: 6-11, free <6', default: '6-11' },
+    { key: 'hours', label: 'Mở cửa', type: 'text', placeholder: '8:00 - 17:00' },
+    { key: 'closedDay', label: 'Ngày nghỉ', type: 'text', placeholder: 'Không / Thứ 2...' },
+    { key: 'needBooking', label: 'Cần đặt trước', type: 'select', options: ['Không','Cần'], default: 'Không' }
+  ],
+  bh: [
+    { key: 'serviceType', label: 'Loại DV', type: 'select', options: ['Bảo hiểm','Quà tặng','In ấn','Quay phim','Phiên dịch','Y tế','Khác'], default: 'Bảo hiểm' },
+    { key: 'priceUnit', label: 'Đơn giá (VNĐ)', type: 'number', isPrice: true },
+    { key: 'unit', label: 'Đơn vị tính', type: 'text', placeholder: 'người/cái/ngày/gói', default: 'người' },
+    { key: 'coverage', label: 'Bao gồm / Mức bồi thường', type: 'textarea', span2: true }
+  ],
+
+  // === HDV — Danh bạ cộng tác viên (đơn giản hoá theo yêu cầu) ===
+  hdv: [
+    { key: 'language', label: 'Ngôn ngữ chính', type: 'select', options: ['EN','FR','DE','ES','IT','JP','KR','CN','RU','EN/FR','EN/CN','Multi'], default: 'EN' },
+    { key: 'languageOther', label: 'Ngôn ngữ phụ', type: 'text', placeholder: 'Optional — ngôn ngữ phụ nếu có' },
+    { key: 'specialty', label: 'Chuyên môn', type: 'text', placeholder: 'VD: Văn hoá Bắc, MICE, Trekking Sapa...' },
+    { key: 'experience', label: 'Số năm kinh nghiệm', type: 'number' },
+    { key: 'license', label: 'Thẻ HDV', type: 'select', options: ['Quốc tế','Nội địa','Không'], default: 'Quốc tế' },
+    { key: 'collabHistory', label: 'Đã làm tour cùng', type: 'textarea', placeholder: 'VD: Tour Mỹ T3/2026, đoàn FR T5/2026...', span2: true }
+  ]
+};
+
+// ============================================================
+// DATA LAYER
+// ============================================================
+let db = loadDB();
+let currentView = 'all';
+let currentFilters = { search: '', region: '', rating: '' };
+let editingId = null;
+let confirmCallback = null;
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { suppliers: {} };
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to load DB:', e);
+    return { suppliers: {} };
+  }
+}
+
+function saveDB() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  } catch (e) {
+    toast('Lỗi lưu dữ liệu: ' + e.message, 'error');
+  }
+}
+
+// Generate next supplier code for a category + region
+function nextCode(category, region) {
+  const catCode = CATEGORIES[category].code;
+  const regCode = REGION_CODES[region] || 'VN';
+  const prefix = `${catCode}-${regCode}-`;
+  let max = 0;
+  Object.values(db.suppliers).forEach(s => {
+    if (s.code && s.code.startsWith(prefix)) {
+      const num = parseInt(s.code.slice(prefix.length));
+      if (!isNaN(num) && num > max) max = num;
+    }
+  });
+  return prefix + String(max + 1).padStart(3, '0');
+}
+
+function genId() {
+  return 's_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+const fmt = n => isFinite(n) && n !== 0 ? new Intl.NumberFormat('vi-VN').format(Math.round(n)) : (n === 0 ? '0' : '—');
+
+// ============================================================
+// VIEW MANAGEMENT
+// ============================================================
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.view === view);
+  });
+  if (view === 'catalog' || view === 'tour') {
+    renderComingSoon(view);
+  } else {
+    renderSupplierList();
+  }
+}
+
+function renderSupplierList() {
+  const main = document.getElementById('main');
+  const isAll = currentView === 'all';
+  const catName = isAll ? 'Tất cả nhà cung cấp' : CATEGORIES[currentView].name;
+  const catIcon = isAll ? '' : CATEGORIES[currentView].icon;
+  document.getElementById('crumbs').innerHTML = isAll
+    ? '<strong>Tất cả nhà cung cấp</strong>'
+    : `<a onclick="setView('all')">Tất cả</a> / <strong>${catName}</strong>`;
+
+  // Filter data
+  const items = filterSuppliers();
+
+  main.innerHTML = `
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">${catIcon} ${catName}</h1>
+        <div class="page-subtitle">${items.length} nhà cung cấp${isAll ? '' : ' trong danh mục'}</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn primary" onclick="openDrawer()">＋ Thêm nhà cung cấp</button>
+      </div>
+    </div>
+
+    <div class="stats-strip">${renderStatsStrip()}</div>
+
+    <div class="toolbar">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm theo mã, tên, người liên hệ..." value="${escapeAttr(currentFilters.search)}" oninput="onSearch(this.value)">
+      <select class="filter-select" onchange="onFilterRegion(this.value)">
+        <option value="">Tất cả vùng</option>
+        ${REGIONS.map(r => `<option value="${escapeAttr(r)}" ${currentFilters.region===r?'selected':''}>${escapeHtml(r)}</option>`).join('')}
+      </select>
+      <select class="filter-select" onchange="onFilterRating(this.value)">
+        <option value="">Mọi đánh giá</option>
+        <option value="5" ${currentFilters.rating==='5'?'selected':''}>⭐⭐⭐⭐⭐</option>
+        <option value="4" ${currentFilters.rating==='4'?'selected':''}>⭐⭐⭐⭐ trở lên</option>
+        <option value="3" ${currentFilters.rating==='3'?'selected':''}>⭐⭐⭐ trở lên</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      ${items.length === 0 ? renderEmpty() : renderTable(items)}
+    </div>
+  `;
+}
+
+function renderStatsStrip() {
+  const all = Object.values(db.suppliers);
+  const total = all.length;
+  const totalRating = all.filter(s => s.rating > 0).reduce((sum, s) => sum + s.rating, 0);
+  const avgRating = total > 0 && totalRating > 0 ? (totalRating / all.filter(s => s.rating > 0).length).toFixed(1) : '—';
+  const withVAT = all.filter(s => s.vat > 0).length;
+  const regionCount = new Set(all.map(s => s.region).filter(Boolean)).size;
+  return `
+    <div class="stat">
+      <div class="stat-label">Tổng NCC</div>
+      <div class="stat-val">${total}</div>
+      <div class="stat-sub">trong database</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Đánh giá TB</div>
+      <div class="stat-val">${avgRating}<span style="font-size:14px; color:#f59e0b">⭐</span></div>
+      <div class="stat-sub">trên thang 5</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">NCC có VAT</div>
+      <div class="stat-val">${withVAT}</div>
+      <div class="stat-sub">${total > 0 ? Math.round(withVAT/total*100) : 0}% xuất hoá đơn</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Vùng phủ</div>
+      <div class="stat-val">${regionCount}</div>
+      <div class="stat-sub">vùng/miền khác nhau</div>
+    </div>
+  `;
+}
+
+function renderEmpty() {
+  const isAll = currentView === 'all';
+  return `
+    <div class="empty-state">
+      <h3>${isAll ? 'Chưa có nhà cung cấp nào' : 'Không tìm thấy NCC phù hợp'}</h3>
+      <p>${isAll
+        ? 'Bắt đầu nhập NCC đầu tiên, hoặc bấm "🌱 Seed mẫu" để có 20 NCC mẫu chuẩn ngành VN.'
+        : 'Thử bỏ bộ lọc, hoặc chuyển sang danh mục khác.'}</p>
+      <button class="btn primary" onclick="openDrawer()">＋ Thêm nhà cung cấp</button>
+      ${isAll ? '<button class="btn" style="margin-left:8px" onclick="loadSamples()">🌱 Seed mẫu</button>' : ''}
+    </div>
+  `;
+}
+
+function renderTable(items) {
+  // Adapt columns based on current view (single category)
+  const cat = currentView !== 'all' ? CATEGORIES[currentView] : null;
+  const group = cat ? cat.group : null;
+
+  // === GROUP A view: show prices ===
+  if (currentView === 'tq') {
+    return renderTableTQ(items);
+  }
+  if (currentView === 'bh') {
+    return renderTableBH(items);
+  }
+  if (currentView === 'hdv') {
+    return renderTableHDV(items);
+  }
+
+  // === GROUP B/C view or All: show contact + Drive folder ===
+  const headers = ['Mã NCC', 'Tên', 'Loại', 'Vùng', 'Liên hệ', 'VAT', '⭐', '📁 Drive', ''];
+  return `
+    <table class="suppliers">
+      <thead>
+        <tr>${headers.map((h, i) => `<th class="${i===5?'num':''}">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${items.map(s => {
+          const driveUrl = s.extras?.driveFolderUrl || s.extras?.mainFolderUrl || '';
+          const attachCount = (s.attachments || []).length;
+          return `
+          <tr onclick="editSupplier('${s.id}')">
+            <td><span class="code-cell">${escapeHtml(s.code)}</span></td>
+            <td>
+              <strong>${escapeHtml(s.name)}</strong>
+              ${attachCount > 0
+                ? `<span class="attach-badge" onclick="viewSupplierAttachments('${s.id}', event)" title="${attachCount} ${s.category==='nh'?'menu':s.category==='land'?'chương trình':'tài liệu'} — click xem">📎 ${attachCount}</span>`
+                : ''}
+            </td>
+            <td><span class="cat-badge ${CATEGORIES[s.category].cls}">${CATEGORIES[s.category].icon} ${CATEGORIES[s.category].name}</span></td>
+            <td><span class="region-tag">${escapeHtml(s.region || '—')}</span></td>
+            <td>${escapeHtml(s.contactName || '—')}<br><span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(s.phone || '')}</span></td>
+            <td class="num">${s.vat > 0 ? s.vat + '%' : '—'}</td>
+            <td><span class="star">${'⭐'.repeat(s.rating || 0)}</span></td>
+            <td onclick="event.stopPropagation()">
+              ${driveUrl
+                ? `<button class="btn sm" onclick="openExternalAttach('${escapeAttr(driveUrl)}')" title="Mở folder Drive">📁 Mở</button>`
+                : '<span style="color:var(--line-strong)">—</span>'}
+            </td>
+            <td onclick="event.stopPropagation()">
+              <div class="row-actions">
+                <button class="btn sm" onclick="duplicateSupplier('${s.id}')" title="Nhân bản">⎘</button>
+                <button class="btn sm danger" onclick="confirmDelete('${s.id}')" title="Xoá">🗑</button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// === Specialized table for Vé tham quan ===
+function renderTableTQ(items) {
+  const headers = ['Mã', 'Tên điểm', 'Vùng', 'Loại', 'Adult 2026', 'Child 2026', 'Adult 2027', 'Child 2027', 'Giờ mở', ''];
+  return `
+    <table class="suppliers compact">
+      <thead>
+        <tr>${headers.map((h, i) => `<th class="${[4,5,6,7].includes(i)?'num':''}">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${items.map(s => {
+          const e = s.extras || {};
+          return `
+          <tr onclick="editSupplier('${s.id}')">
+            <td><span class="code-cell">${escapeHtml(s.code)}</span></td>
+            <td><strong>${escapeHtml(s.name)}</strong>${s.notes ? `<br><span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(s.notes.slice(0, 50))}${s.notes.length > 50 ? '…' : ''}</span>` : ''}</td>
+            <td><span class="region-tag">${escapeHtml(s.region || '—')}</span></td>
+            <td><span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(e.type || '—')}</span></td>
+            <td class="num"><strong>${fmt(e.priceAdult2026)}</strong></td>
+            <td class="num">${fmt(e.priceChild2026)}</td>
+            <td class="num" style="color:var(--ink-soft)">${fmt(e.priceAdult2027)}</td>
+            <td class="num" style="color:var(--ink-soft)">${fmt(e.priceChild2027)}</td>
+            <td style="font-size:11px">${escapeHtml(e.hours || '—')}</td>
+            <td onclick="event.stopPropagation()">
+              <div class="row-actions">
+                <button class="btn sm" onclick="duplicateSupplier('${s.id}')" title="Nhân bản">⎘</button>
+                <button class="btn sm danger" onclick="confirmDelete('${s.id}')" title="Xoá">🗑</button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// === Specialized table for BH/Khác ===
+function renderTableBH(items) {
+  const headers = ['Mã', 'Tên', 'Loại DV', 'Đơn giá', 'Đơn vị', 'Bao gồm', 'Liên hệ', ''];
+  return `
+    <table class="suppliers compact">
+      <thead>
+        <tr>${headers.map((h, i) => `<th class="${i===3?'num':''}">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${items.map(s => {
+          const e = s.extras || {};
+          return `
+          <tr onclick="editSupplier('${s.id}')">
+            <td><span class="code-cell">${escapeHtml(s.code)}</span></td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td><span style="font-size:11px">${escapeHtml(e.serviceType || '—')}</span></td>
+            <td class="num"><strong>${fmt(e.priceUnit)}</strong></td>
+            <td style="font-size:11px;color:var(--ink-soft)">${escapeHtml(e.unit || '—')}</td>
+            <td style="font-size:11px;max-width:280px">${escapeHtml((e.coverage || '').slice(0, 80))}${(e.coverage||'').length > 80 ? '…' : ''}</td>
+            <td>${escapeHtml(s.contactName || '—')}<br><span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(s.phone || '')}</span></td>
+            <td onclick="event.stopPropagation()">
+              <div class="row-actions">
+                <button class="btn sm danger" onclick="confirmDelete('${s.id}')" title="Xoá">🗑</button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// === Specialized table for HDV cộng tác viên ===
+function renderTableHDV(items) {
+  const headers = ['Mã', 'Họ tên', 'Vùng', 'Ngôn ngữ', 'Chuyên môn', 'KN (năm)', 'Thẻ HDV', 'Liên hệ', '⭐', ''];
+  return `
+    <table class="suppliers compact">
+      <thead>
+        <tr>${headers.map((h, i) => `<th class="${i===5?'num':''}">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${items.map(s => {
+          const e = s.extras || {};
+          return `
+          <tr onclick="editSupplier('${s.id}')">
+            <td><span class="code-cell">${escapeHtml(s.code)}</span></td>
+            <td><strong>${escapeHtml(s.name)}</strong></td>
+            <td><span class="region-tag">${escapeHtml(s.region || '—')}</span></td>
+            <td><strong style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">${escapeHtml(e.language || '—')}</strong>${e.languageOther ? `<br><span style="font-size:10px;color:var(--ink-soft)">+ ${escapeHtml(e.languageOther)}</span>` : ''}</td>
+            <td style="font-size:11px">${escapeHtml(e.specialty || '—')}</td>
+            <td class="num">${e.experience || '—'}</td>
+            <td><span style="font-size:11px">${escapeHtml(e.license || '—')}</span></td>
+            <td>${escapeHtml(s.phone || '—')}<br><span style="font-size:11px;color:var(--ink-soft)">${escapeHtml(s.email || '')}</span></td>
+            <td><span class="star">${'⭐'.repeat(s.rating || 0)}</span></td>
+            <td onclick="event.stopPropagation()">
+              <div class="row-actions">
+                <button class="btn sm danger" onclick="confirmDelete('${s.id}')" title="Xoá">🗑</button>
+              </div>
+            </td>
+          </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderAttachmentIcon(s) {
+  const hasDrive = s.driveLink && s.driveLink.trim();
+  const hasFiles = s.attachments && s.attachments.length > 0;
+  if (!hasDrive && !hasFiles) return '<span style="color:var(--line-strong)">—</span>';
+  const parts = [];
+  if (hasDrive) parts.push('<span title="Có link Drive" style="color:#1e40af">🔗</span>');
+  if (hasFiles) parts.push(`<span title="${s.attachments.length} file" style="color:#065f46">📎${s.attachments.length}</span>`);
+  return parts.join(' ');
+}
+
+function filterSuppliers() {
+  let items = Object.values(db.suppliers);
+  if (currentView !== 'all') {
+    items = items.filter(s => s.category === currentView);
+  }
+  const q = currentFilters.search.toLowerCase().trim();
+  if (q) {
+    items = items.filter(s =>
+      (s.code || '').toLowerCase().includes(q) ||
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.contactName || '').toLowerCase().includes(q) ||
+      (s.phone || '').includes(q)
+    );
+  }
+  if (currentFilters.region) {
+    items = items.filter(s => s.region === currentFilters.region);
+  }
+  if (currentFilters.rating) {
+    const minR = parseInt(currentFilters.rating);
+    items = items.filter(s => (s.rating || 0) >= minR);
+  }
+  items.sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+  return items;
+}
+
+function onSearch(v) { currentFilters.search = v; renderSupplierList(); }
+function onFilterRegion(v) { currentFilters.region = v; renderSupplierList(); }
+function onFilterRating(v) { currentFilters.rating = v; renderSupplierList(); }
+
+function updateCounts() {
+  const all = Object.values(db.suppliers);
+  document.getElementById('cnt-all').textContent = all.length;
+  Object.keys(CATEGORIES).forEach(cat => {
+    document.getElementById('cnt-' + cat).textContent = all.filter(s => s.category === cat).length;
+  });
+}
+
+function renderComingSoon(view) {
+  const main = document.getElementById('main');
+  const info = view === 'catalog'
+    ? { icon: '📦', title: 'Catalog Dịch vụ', desc: 'Sẽ làm sau khi bạn nhập đủ NCC. Mỗi dịch vụ trong Catalog sẽ link tới các Mã NCC ở đây. Ví dụ: "City tour Hà Nội 1 ngày" gồm Xe (XE-MB-001) + HDV (HD-HN-001) + Vé (TQ-HN-001) + Ăn trưa (NH-HN-001). Khi giá NCC đổi → giá Service tự update.' }
+    : { icon: '📄', title: 'Tour Template', desc: 'Sau khi có Catalog, sẽ xây Tour Template — mỗi tour là tập hợp các Service theo ngày. Khi sale tạo báo giá → click vào tour → tự ra bảng chiết tính có sẵn tất cả NCC và giá.' };
+  document.getElementById('crumbs').innerHTML = `<a onclick="setView('all')">Tất cả</a> / <strong>${info.title}</strong>`;
+  main.innerHTML = `
+    <div class="coming-soon">
+      <div class="coming-soon-icon">${info.icon}</div>
+      <h2>${info.title}</h2>
+      <p>${info.desc}</p>
+      <button class="btn primary" onclick="setView('all')">← Quay lại NCC</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// DRAWER (ADD/EDIT FORM)
+// ============================================================
+function openDrawer(id = null) {
+  editingId = id;
+  const supplier = id ? db.suppliers[id] : null;
+  const cat = supplier ? supplier.category : (currentView !== 'all' ? currentView : 'hotel');
+
+  // Init working copy of attachments
+  window._currentAttachments = supplier && supplier.attachments ? JSON.parse(JSON.stringify(supplier.attachments)) : [];
+
+  document.getElementById('drawer-title').textContent = id ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp';
+  renderDrawerForm(cat, supplier);
+  document.getElementById('drawer-backdrop').classList.add('show');
+  document.getElementById('drawer').classList.add('show');
+  setTimeout(() => {
+    const firstInput = document.querySelector('#drawer-body input, #drawer-body select');
+    if (firstInput) firstInput.focus();
+  }, 250);
+}
+
+function renderDrawerForm(category, supplier) {
+  const s = supplier || {};
+  const extras = EXTRA_FIELDS[category] || [];
+
+  const html = `
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Loại NCC <span class="req">*</span></label>
+        <select id="f-category" onchange="renderDrawerForm(this.value, getFormData())">
+          ${Object.entries(CATEGORIES).map(([key, c]) =>
+            `<option value="${key}" ${category===key?'selected':''}>${c.icon} ${c.name}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Vùng <span class="req">*</span></label>
+        <select id="f-region" onchange="updateCodePreview()">
+          <option value="">— Chọn vùng —</option>
+          ${REGIONS.map(r => `<option value="${escapeAttr(r)}" ${s.region===r?'selected':''}>${escapeHtml(r)}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Mã NCC <span class="req">*</span></label>
+        <input type="text" id="f-code" value="${escapeAttr(s.code || '')}" placeholder="VD: HT-HN-001" style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent)">
+        <div class="hint code-hint" id="code-preview">Tự động tạo khi chọn loại + vùng</div>
+      </div>
+      <div class="form-field">
+        <label>Tên NCC <span class="req">*</span></label>
+        <input type="text" id="f-name" value="${escapeAttr(s.name || '')}" placeholder="VD: Le Jardin Hotel">
+      </div>
+
+      <div class="section-divider">Thông tin liên hệ</div>
+      <div class="form-field">
+        <label>Người liên hệ</label>
+        <input type="text" id="f-contactName" value="${escapeAttr(s.contactName || '')}" placeholder="Ms. Linh">
+      </div>
+      <div class="form-field">
+        <label>Điện thoại</label>
+        <input type="text" id="f-phone" value="${escapeAttr(s.phone || '')}" placeholder="0912 345 678">
+      </div>
+      <div class="form-field span-2">
+        <label>Email</label>
+        <input type="email" id="f-email" value="${escapeAttr(s.email || '')}" placeholder="sales@example.com">
+      </div>
+
+      <div class="section-divider">Đặc thù ${CATEGORIES[category].name}</div>
+      ${extras.map(f => renderFieldHTML(f, s.extras?.[f.key])).join('')}
+
+      <div class="section-divider">Thông tin tài chính & đánh giá</div>
+      <div class="form-field">
+        <label>VAT %</label>
+        <select id="f-vat">
+          ${[0, 5, 8, 10].map(v => `<option value="${v}" ${(s.vat ?? 8)==v?'selected':''}>${v}%</option>`).join('')}
+        </select>
+        <div class="hint">8% là VAT du lịch đến 31/12/2026</div>
+      </div>
+      <div class="form-field">
+        <label>Hạn thanh toán (ngày)</label>
+        <input type="number" id="f-paymentDays" value="${s.paymentDays ?? ''}" placeholder="0, 7, 15, 30">
+      </div>
+      <div class="form-field">
+        <label>MST</label>
+        <input type="text" id="f-mst" value="${escapeAttr(s.mst || '')}" placeholder="0101234567">
+      </div>
+      <div class="form-field">
+        <label>Đánh giá</label>
+        <div class="star-input" id="f-rating-input" data-value="${s.rating || 0}">
+          ${[1,2,3,4,5].map(i => `<span data-star="${i}" class="${(s.rating||0) >= i ? 'active' : ''}" onclick="setRating(${i})">⭐</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="form-field span-2">
+        <label>Ghi chú</label>
+        <textarea id="f-notes" placeholder="Đặc điểm, lưu ý khi book, ưu nhược điểm...">${escapeHtml(s.notes || '')}</textarea>
+      </div>
+
+      <div class="section-divider">${
+        CATEGORIES[category].group === 'C'
+          ? (category === 'nh' ? '📋 Danh sách Menu (theo file)' : '📋 Danh sách Chương trình tour (theo file)')
+          : '📎 Tài liệu đính kèm'
+      }</div>
+      <div class="form-field span-2">
+        ${CATEGORIES[category].group === 'C' ? `
+          <div class="hint" style="margin-bottom:10px; background:var(--accent-soft); border-left:3px solid var(--accent); padding:8px 12px; border-radius:5px;">
+            <strong>💡 Cách dùng:</strong> Thêm từng ${category === 'nh' ? 'menu' : 'chương trình tour'} thành 1 dòng riêng. VD: "${
+              category === 'nh' ? 'Set menu 250k khách Á' : 'Mekong 1 ngày FIT'
+            }". Bấm vào tên để mở file Drive xem chi tiết.
+          </div>
+        ` : ''}
+        <div id="attachments-list" class="attachments-list"></div>
+        <div class="attach-actions">
+          <button type="button" class="btn" onclick="addAttachmentRow('url')">
+            <span>🔗</span> ${CATEGORIES[category].group === 'C' ? (category === 'nh' ? 'Thêm menu (link Drive)' : 'Thêm chương trình (link Drive)') : 'Thêm link Drive/URL'}
+          </button>
+          <button type="button" class="btn" onclick="addAttachmentRow('path')">
+            <span>📁</span> Thêm đường dẫn PC
+          </button>
+          <button type="button" class="btn" onclick="document.getElementById('f-attachment').click()">
+            <span>⬆️</span> Upload file
+          </button>
+          <input type="file" id="f-attachment" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" style="display:none" onchange="handleAttachmentUpload(event)">
+        </div>
+        <div class="hint" style="margin-top:8px">
+          <strong>🔗 URL:</strong> Link Drive (khuyên dùng) · <strong>📁 Path:</strong> Đường dẫn PC · <strong>⬆️ Upload:</strong> Embed vào browser (<5MB)
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('drawer-body').innerHTML = html;
+
+  // Trigger code preview after render
+  setTimeout(() => {
+    updateCodePreview();
+    renderAttachmentsList();
+  }, 50);
+}
+
+function renderFieldHTML(field, value) {
+  const isPrice = field.isPrice;
+  const v = (value !== undefined && value !== null) ? value : (field.default !== undefined ? field.default : '');
+  const placeholder = field.placeholder || '';
+
+  let inputHTML;
+  if (field.type === 'select') {
+    inputHTML = `
+      <select id="f-extra-${field.key}">
+        <option value="">— Chọn —</option>
+        ${field.options.map(opt => `<option value="${escapeAttr(opt)}" ${v===opt?'selected':''}>${escapeHtml(opt)}</option>`).join('')}
+      </select>
+    `;
+  } else if (field.type === 'textarea') {
+    inputHTML = `<textarea id="f-extra-${field.key}" placeholder="${escapeAttr(placeholder)}">${escapeHtml(v)}</textarea>`;
+  } else if (field.type === 'number') {
+    inputHTML = `<input type="number" id="f-extra-${field.key}" value="${v ?? ''}" placeholder="${escapeAttr(placeholder)}" ${isPrice ? 'step="1000"' : ''}>`;
+  } else {
+    inputHTML = `<input type="text" id="f-extra-${field.key}" value="${escapeAttr(v)}" placeholder="${escapeAttr(placeholder)}">`;
+  }
+
+  return `
+    <div class="form-field ${field.type === 'textarea' ? 'span-2' : ''}">
+      <label>${escapeHtml(field.label)}</label>
+      ${inputHTML}
+    </div>
+  `;
+}
+
+function setRating(n) {
+  const input = document.getElementById('f-rating-input');
+  input.dataset.value = n;
+  input.querySelectorAll('span').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.star) <= n);
+  });
+}
+
+function updateCodePreview() {
+  const cat = document.getElementById('f-category')?.value;
+  const region = document.getElementById('f-region')?.value;
+  const codeInput = document.getElementById('f-code');
+  const preview = document.getElementById('code-preview');
+  if (!cat || !region || !codeInput || !preview) return;
+  // Only auto-fill if it's a new entry and code is empty
+  if (!editingId && !codeInput.value.trim()) {
+    const code = nextCode(cat, region);
+    codeInput.value = code;
+    preview.textContent = `Tự động tạo: ${code}`;
+  } else {
+    preview.textContent = `Format: ${CATEGORIES[cat].code}-${REGION_CODES[region] || 'VN'}-XXX`;
+  }
+}
+
+function getFormData() {
+  const get = id => document.getElementById(id)?.value || '';
+  const cat = get('f-category');
+  const extras = {};
+  (EXTRA_FIELDS[cat] || []).forEach(f => {
+    const el = document.getElementById('f-extra-' + f.key);
+    if (el) {
+      const v = el.value;
+      extras[f.key] = f.type === 'number' && v !== '' ? parseFloat(v) : v;
+    }
+  });
+  return {
+    category: cat,
+    region: get('f-region'),
+    code: get('f-code').trim().toUpperCase(),
+    name: get('f-name').trim(),
+    contactName: get('f-contactName').trim(),
+    phone: get('f-phone').trim(),
+    email: get('f-email').trim(),
+    vat: parseFloat(get('f-vat')) || 0,
+    paymentDays: parseFloat(get('f-paymentDays')) || 0,
+    mst: get('f-mst').trim(),
+    rating: parseInt(document.getElementById('f-rating-input')?.dataset.value) || 0,
+    notes: get('f-notes').trim(),
+    attachments: window._currentAttachments || [],
+    extras
+  };
+}
+
+function saveSupplier() {
+  const data = getFormData();
+
+  // Validation
+  if (!data.code) return toast('Mã NCC bắt buộc', 'error');
+  if (!data.name) return toast('Tên NCC bắt buộc', 'error');
+  if (!data.region) return toast('Vùng bắt buộc', 'error');
+
+  // Check duplicate code (except when editing same record)
+  const existing = Object.values(db.suppliers).find(s => s.code === data.code && s.id !== editingId);
+  if (existing) return toast('Mã ' + data.code + ' đã tồn tại', 'error');
+
+  if (editingId) {
+    db.suppliers[editingId] = { ...db.suppliers[editingId], ...data, updated: new Date().toISOString() };
+    toast('✓ Đã cập nhật ' + data.code, 'success');
+  } else {
+    const id = genId();
+    db.suppliers[id] = { id, ...data, created: new Date().toISOString(), updated: new Date().toISOString() };
+    toast('✓ Đã thêm ' + data.code, 'success');
+  }
+  saveDB();
+  closeDrawer();
+  renderSupplierList();
+  updateCounts();
+}
+
+// ============================================================
+// ATTACHMENTS — multiple files per supplier
+// 3 types:
+//   - url: external link (Drive/Dropbox/...)
+//   - path: local PC file path (manual entry)
+//   - embed: file embedded as Base64 in localStorage
+// ============================================================
+function renderAttachmentsList() {
+  const container = document.getElementById('attachments-list');
+  if (!container) return;
+  const items = window._currentAttachments || [];
+  if (items.length === 0) {
+    container.innerHTML = '<div class="attach-empty">Chưa có tài liệu. Bấm các nút bên dưới để thêm.</div>';
+    return;
+  }
+  container.innerHTML = items.map((a, idx) => {
+    const icon = a.type === 'url' ? '🔗' : a.type === 'path' ? '📁' : '📄';
+    const typeLabel = a.type === 'url' ? 'URL' : a.type === 'path' ? 'PC Path' : 'Embedded';
+    const size = a.size ? ` · ${formatBytes(a.size)}` : '';
+    return `
+      <div class="attach-item" data-idx="${idx}">
+        <div class="attach-icon">${icon}</div>
+        <div class="attach-info">
+          <input type="text" class="attach-label" placeholder="Nhãn (vd: Contract 2026, Rate sheet...)" value="${escapeAttr(a.label || '')}" oninput="updateAttachLabel(${idx}, this.value)">
+          ${a.type === 'embed'
+            ? `<div class="attach-meta">${escapeHtml(a.filename || '')}${size} · <span class="attach-type">${typeLabel}</span></div>`
+            : `<input type="text" class="attach-value" placeholder="${a.type === 'url' ? 'https://drive.google.com/...' : 'C:\\\\Users\\\\...\\\\contract.pdf hoặc /Users/.../contract.pdf'}" value="${escapeAttr(a.value || '')}" oninput="updateAttachValue(${idx}, this.value)">
+              <div class="attach-meta"><span class="attach-type">${typeLabel}</span></div>`
+          }
+        </div>
+        <div class="attach-actions-row">
+          ${a.type !== 'path' ? `<button type="button" class="btn sm" onclick="openAttachment(${idx})" title="Mở">${a.type === 'embed' ? '👁' : '↗'}</button>` : `<button type="button" class="btn sm" onclick="copyAttachPath(${idx})" title="Copy đường dẫn">📋</button>`}
+          <button type="button" class="btn sm danger" onclick="removeAttachment(${idx})" title="Xoá">🗑</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addAttachmentRow(type) {
+  if (!window._currentAttachments) window._currentAttachments = [];
+  window._currentAttachments.push({
+    type,
+    label: '',
+    value: '',
+    added: new Date().toISOString()
+  });
+  renderAttachmentsList();
+}
+
+function updateAttachLabel(idx, val) {
+  if (window._currentAttachments && window._currentAttachments[idx]) {
+    window._currentAttachments[idx].label = val;
+  }
+}
+
+function updateAttachValue(idx, val) {
+  if (window._currentAttachments && window._currentAttachments[idx]) {
+    window._currentAttachments[idx].value = val;
+  }
+}
+
+function removeAttachment(idx) {
+  if (!window._currentAttachments) return;
+  const item = window._currentAttachments[idx];
+  if (item.type === 'embed') {
+    if (!confirm('Xoá file "' + (item.label || item.filename) + '"? File sẽ mất, không khôi phục được.')) return;
+  }
+  window._currentAttachments.splice(idx, 1);
+  renderAttachmentsList();
+}
+
+function openAttachment(idx) {
+  const a = window._currentAttachments[idx];
+  if (!a) return;
+  if (a.type === 'url') {
+    if (!a.value) return toast('Chưa nhập URL', 'error');
+    let url = a.value;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    window.open(url, '_blank');
+  } else if (a.type === 'embed') {
+    openEmbeddedFile(a);
+  }
+}
+
+function copyAttachPath(idx) {
+  const a = window._currentAttachments[idx];
+  if (!a || !a.value) return toast('Chưa nhập đường dẫn', 'error');
+  navigator.clipboard.writeText(a.value).then(() => {
+    toast('✓ Đã copy đường dẫn — paste vào File Explorer/Finder', 'success');
+  });
+}
+
+function openEmbeddedFile(a) {
+  // Decode base64 and open in new tab via Blob URL
+  try {
+    const byteString = atob(a.value.split(',')[1] || a.value);
+    const mimeMatch = (a.value.match(/^data:([^;]+);/) || [])[1] || a.mimeType || 'application/octet-stream';
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+    const blob = new Blob([ab], { type: mimeMatch });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    // Auto-revoke after 1 minute
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    toast('Không mở được file: ' + e.message, 'error');
+  }
+}
+
+function handleAttachmentUpload(event) {
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
+
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB per file
+  let processed = 0;
+  let errors = [];
+
+  files.forEach(file => {
+    if (file.size > MAX_SIZE) {
+      errors.push(`${file.name}: quá ${formatBytes(MAX_SIZE)}, dùng Link Drive thay thế`);
+      processed++;
+      if (processed === files.length) finalize();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (!window._currentAttachments) window._currentAttachments = [];
+      window._currentAttachments.push({
+        type: 'embed',
+        label: file.name.replace(/\.[^.]+$/, ''),
+        filename: file.name,
+        value: e.target.result, // Base64 data URL
+        mimeType: file.type,
+        size: file.size,
+        added: new Date().toISOString()
+      });
+      processed++;
+      if (processed === files.length) finalize();
+    };
+    reader.onerror = () => {
+      errors.push(`${file.name}: đọc file lỗi`);
+      processed++;
+      if (processed === files.length) finalize();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function finalize() {
+    renderAttachmentsList();
+    event.target.value = ''; // reset input
+    if (errors.length > 0) {
+      toast(`⚠ ${errors.length} file lỗi: ${errors[0]}`, 'error');
+    } else {
+      toast(`✓ Đã thêm ${files.length} file`, 'success');
+    }
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+// View all attachments for a supplier (from main list, without opening edit drawer)
+function viewSupplierAttachments(id, event) {
+  if (event) event.stopPropagation();
+  const s = db.suppliers[id];
+  if (!s || !s.attachments || s.attachments.length === 0) {
+    return toast('NCC này chưa có tài liệu', 'error');
+  }
+  // Reuse confirm dialog as info panel
+  const list = s.attachments.map((a, idx) => {
+    const icon = a.type === 'url' ? '🔗' : a.type === 'path' ? '📁' : '📄';
+    const label = a.label || a.filename || 'Tài liệu ' + (idx + 1);
+    return { icon, label, attachment: a };
+  });
+  showAttachmentsPanel(s, list);
+}
+
+function showAttachmentsPanel(supplier, items) {
+  const panel = document.getElementById('attachments-panel') || createAttachmentsPanel();
+  document.getElementById('ap-title').textContent = `📎 Tài liệu — ${supplier.name}`;
+  document.getElementById('ap-subtitle').textContent = `${supplier.code} · ${items.length} tài liệu`;
+  document.getElementById('ap-list').innerHTML = items.map((it, idx) => {
+    const a = it.attachment;
+    const action = a.type === 'url'
+      ? `<button class="btn primary sm" onclick="openExternalAttach('${a.value.replace(/'/g, "\\'")}')">↗ Mở link</button>`
+      : a.type === 'path'
+      ? `<button class="btn sm" onclick="copyToClipboard('${a.value.replace(/'/g, "\\'")}')">📋 Copy path</button>`
+      : `<button class="btn primary sm" onclick="openEmbeddedFromList('${supplier.id}', ${idx})">👁 Xem</button>`;
+    const pathPreview = a.type === 'path' ? `<div class="ap-path">${escapeHtml(a.value)}</div>` : '';
+    return `
+      <div class="ap-item">
+        <div class="ap-icon">${it.icon}</div>
+        <div class="ap-info">
+          <div class="ap-label">${escapeHtml(it.label)}</div>
+          <div class="ap-type">${a.type === 'url' ? 'URL link' : a.type === 'path' ? 'PC path' : a.filename + (a.size ? ' · ' + formatBytes(a.size) : '')}</div>
+          ${pathPreview}
+        </div>
+        <div>${action}</div>
+      </div>
+    `;
+  }).join('');
+  panel.classList.add('show');
+  document.getElementById('attachments-panel-backdrop').classList.add('show');
+}
+
+function createAttachmentsPanel() {
+  const backdrop = document.createElement('div');
+  backdrop.id = 'attachments-panel-backdrop';
+  backdrop.className = 'confirm-backdrop';
+  backdrop.onclick = (e) => { if (e.target === backdrop) closeAttachmentsPanel(); };
+  document.body.appendChild(backdrop);
+
+  const panel = document.createElement('div');
+  panel.id = 'attachments-panel';
+  panel.className = 'attachments-panel';
+  panel.innerHTML = `
+    <div class="ap-head">
+      <div>
+        <h3 id="ap-title"></h3>
+        <div id="ap-subtitle" class="ap-sub"></div>
+      </div>
+      <button class="btn ghost" onclick="closeAttachmentsPanel()" style="font-size:18px; padding:4px 10px">×</button>
+    </div>
+    <div id="ap-list" class="ap-list"></div>
+  `;
+  backdrop.appendChild(panel);
+  return panel;
+}
+
+function closeAttachmentsPanel() {
+  const p = document.getElementById('attachments-panel');
+  const b = document.getElementById('attachments-panel-backdrop');
+  if (p) p.classList.remove('show');
+  if (b) b.classList.remove('show');
+}
+
+function openExternalAttach(url) {
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  window.open(url, '_blank');
+}
+
+function openEmbeddedFromList(supplierId, idx) {
+  const s = db.suppliers[supplierId];
+  if (!s || !s.attachments) return;
+  openEmbeddedFile(s.attachments[idx]);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    toast('✓ Đã copy đường dẫn', 'success');
+  });
+}
+
+
+function editSupplier(id) {
+  openDrawer(id);
+}
+
+function duplicateSupplier(id) {
+  const s = db.suppliers[id];
+  if (!s) return;
+  const newId = genId();
+  const newCode = nextCode(s.category, s.region);
+  db.suppliers[newId] = { ...s, id: newId, code: newCode, name: s.name + ' (Copy)', created: new Date().toISOString(), updated: new Date().toISOString() };
+  saveDB();
+  renderSupplierList();
+  updateCounts();
+  toast('✓ Đã nhân bản → ' + newCode, 'success');
+}
+
+function confirmDelete(id) {
+  const s = db.suppliers[id];
+  if (!s) return;
+  openConfirm('Xoá nhà cung cấp', `Xoá "${s.name}" (${s.code})? Hành động này không thể hoàn tác.`, () => {
+    delete db.suppliers[id];
+    saveDB();
+    renderSupplierList();
+    updateCounts();
+    toast('✓ Đã xoá ' + s.code, 'success');
+  });
+}
+
+function closeDrawer(e) {
+  if (e && e.target.id !== 'drawer-backdrop') return;
+  document.getElementById('drawer-backdrop').classList.remove('show');
+  document.getElementById('drawer').classList.remove('show');
+  editingId = null;
+}
+
+// ============================================================
+// CONFIRM DIALOG
+// ============================================================
+function openConfirm(title, msg, callback) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  confirmCallback = callback;
+  document.getElementById('confirm-backdrop').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirm-backdrop').classList.remove('show');
+  confirmCallback = null;
+}
+document.getElementById('confirm-ok').onclick = () => {
+  if (confirmCallback) confirmCallback();
+  closeConfirm();
+};
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData() {
+  const stamp = new Date().toISOString().slice(0,10);
+  const payload = {
+    version: 1,
+    exported: new Date().toISOString(),
+    suppliers: db.suppliers
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `supplierhub-backup-${stamp}.json`;
+  a.click();
+  toast('✓ Đã xuất backup', 'success');
+}
+
+function importData() {
+  document.getElementById('fileImport').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload.suppliers) return toast('File không hợp lệ', 'error');
+      openConfirm('Khôi phục dữ liệu',
+        `Sẽ thay thế ${Object.keys(db.suppliers).length} NCC hiện tại bằng ${Object.keys(payload.suppliers).length} NCC từ file. Tiếp tục?`,
+        () => {
+          db.suppliers = payload.suppliers;
+          saveDB();
+          renderSupplierList();
+          updateCounts();
+          toast('✓ Đã khôi phục ' + Object.keys(payload.suppliers).length + ' NCC', 'success');
+        }
+      );
+    } catch (err) {
+      toast('Lỗi đọc file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// BULK IMPORT
+// ============================================================
+let bulkMode = 'json';
+let bulkParsedItems = []; // Array of {ok, item, error, isDuplicate}
+let bulkPromptCategory = 'hotel';
+
+function openBulkImport() {
+  document.getElementById('bulk-backdrop').classList.add('show');
+  document.getElementById('bulk-drawer').classList.add('show');
+  setBulkMode('json');
+  renderPromptCategorySelector();
+  hideBulkPreview();
+}
+
+function closeBulkImport(e) {
+  if (e && e.target.id !== 'bulk-backdrop') return;
+  document.getElementById('bulk-backdrop').classList.remove('show');
+  document.getElementById('bulk-drawer').classList.remove('show');
+  hideBulkPreview();
+}
+
+function setBulkMode(mode) {
+  bulkMode = mode;
+  document.querySelectorAll('.bulk-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.mode === mode);
+  });
+  document.getElementById('bulk-pane-json').style.display = mode === 'json' ? 'block' : 'none';
+  document.getElementById('bulk-pane-csv').style.display = mode === 'csv' ? 'block' : 'none';
+  document.getElementById('bulk-pane-prompt').style.display = mode === 'prompt' ? 'block' : 'none';
+  hideBulkPreview();
+}
+
+function hideBulkPreview() {
+  document.getElementById('bulk-preview').style.display = 'none';
+  document.getElementById('bulk-import-btn').style.display = 'none';
+  bulkParsedItems = [];
+}
+
+// ----- JSON parsing -----
+function previewBulkJson() {
+  const txt = document.getElementById('bulk-json').value.trim();
+  if (!txt) return toast('Paste JSON vào ô trước', 'error');
+  let raw;
+  try {
+    raw = JSON.parse(txt);
+  } catch (e) {
+    return toast('JSON không hợp lệ: ' + e.message, 'error');
+  }
+  const items = Array.isArray(raw) ? raw : [raw];
+  parseBulkItems(items);
+  renderBulkPreview();
+}
+
+// ----- CSV parsing -----
+function previewBulkCsv() {
+  const txt = document.getElementById('bulk-csv').value.trim();
+  if (!txt) return toast('Paste CSV vào ô trước', 'error');
+
+  // Auto-detect delimiter: tab (Excel paste) or comma
+  const firstLine = txt.split('\n')[0];
+  const delim = firstLine.includes('\t') ? '\t' : ',';
+
+  const lines = txt.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return toast('Cần ít nhất 1 dòng header + 1 dòng dữ liệu', 'error');
+
+  const headers = parseCSVLine(lines[0], delim).map(h => h.trim().toLowerCase());
+  const items = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i], delim);
+    const obj = {};
+    headers.forEach((h, idx) => {
+      const v = cells[idx]?.trim() ?? '';
+      if (v === '') return;
+      // Normalize headers
+      if (h === 'loại' || h === 'loai' || h === 'category') obj.category = v.toLowerCase();
+      else if (h === 'tên' || h === 'ten' || h === 'name') obj.name = v;
+      else if (h === 'vùng' || h === 'vung' || h === 'region') obj.region = v;
+      else if (h === 'người liên hệ' || h === 'contactname' || h === 'lien he') obj.contactName = v;
+      else if (h === 'điện thoại' || h === 'phone' || h === 'sdt') obj.phone = v;
+      else if (h === 'email') obj.email = v;
+      else if (h === 'vat' || h === 'vat %' || h === 'vat%') obj.vat = parseFloat(v) || 0;
+      else if (h === 'hạn tt' || h === 'paymentdays' || h === 'han tt') obj.paymentDays = parseFloat(v) || 0;
+      else if (h === 'mst') obj.mst = v;
+      else if (h === 'đánh giá' || h === 'rating') {
+        // Could be "⭐⭐⭐⭐" or a number
+        const stars = (v.match(/⭐/g) || []).length;
+        obj.rating = stars > 0 ? stars : (parseFloat(v) || 0);
+      }
+      else if (h === 'ghi chú' || h === 'notes' || h === 'note') obj.notes = v;
+      else obj[h] = v; // unknown header — keep raw
+    });
+    if (Object.keys(obj).length > 0) items.push(obj);
+  }
+  parseBulkItems(items);
+  renderBulkPreview();
+}
+
+function parseCSVLine(line, delim) {
+  // Simple CSV parser supporting quoted values
+  const result = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuotes && line[i+1] === '"') { cur += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (c === delim && !inQuotes) {
+      result.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ----- Validate & normalize items -----
+function parseBulkItems(items) {
+  bulkParsedItems = items.map((raw, idx) => {
+    const item = normalizeImportItem(raw);
+    const errors = validateImportItem(item);
+    if (errors.length > 0) {
+      return { ok: false, item, error: errors.join('; '), index: idx + 1 };
+    }
+    // Generate code if missing
+    if (!item.code) {
+      item.code = nextCode(item.category, item.region);
+    }
+    // Check duplicate
+    const existing = Object.values(db.suppliers).find(s => s.code === item.code);
+    if (existing) {
+      return { ok: false, item, isDuplicate: true, error: `Mã ${item.code} đã có: "${existing.name}"`, index: idx + 1 };
+    }
+    return { ok: true, item, index: idx + 1 };
+  });
+}
+
+function normalizeImportItem(raw) {
+  // Map common variations of category
+  const catMap = {
+    'hotel':'hotel','khách sạn':'hotel','khach san':'hotel','ks':'hotel',
+    'cruise':'cruise','du thuyền':'cruise','du thuyen':'cruise',
+    'xe':'xe','vận chuyển':'xe','van chuyen':'xe','transport':'xe',
+    'land':'land','dmc':'land','đối tác land':'land','land dmc':'land',
+    'nh':'nh','nhà hàng':'nh','nha hang':'nh','restaurant':'nh',
+    'tq':'tq','tham quan':'tq','vé':'tq','attraction':'tq',
+    'hdv':'hdv','hướng dẫn viên':'hdv','huong dan vien':'hdv','guide':'hdv',
+    'bh':'bh','bảo hiểm':'bh','bao hiem':'bh','insurance':'bh','khác':'bh','khac':'bh'
+  };
+  const cat = String(raw.category || '').toLowerCase().trim();
+  return {
+    category: catMap[cat] || cat,
+    code: String(raw.code || '').trim().toUpperCase(),
+    name: String(raw.name || '').trim(),
+    region: String(raw.region || '').trim(),
+    contactName: String(raw.contactName || raw.contact || '').trim(),
+    phone: String(raw.phone || '').trim(),
+    email: String(raw.email || '').trim(),
+    vat: parseFloat(raw.vat) || 0,
+    paymentDays: parseFloat(raw.paymentDays || raw.han_tt || raw.hanTT) || 0,
+    mst: String(raw.mst || '').trim(),
+    rating: parseInt(raw.rating) || 0,
+    notes: String(raw.notes || raw.note || '').trim(),
+    extras: raw.extras || extractExtrasFromFlat(raw, catMap[cat] || cat)
+  };
+}
+
+// When user pastes flat CSV (no nested extras), extract known extra fields by category
+function extractExtrasFromFlat(raw, category) {
+  const fields = EXTRA_FIELDS[category] || [];
+  const extras = {};
+  fields.forEach(f => {
+    if (raw[f.key] !== undefined && raw[f.key] !== '') {
+      const v = raw[f.key];
+      extras[f.key] = f.type === 'number' ? (parseFloat(v) || 0) : String(v);
+    }
+  });
+  return extras;
+}
+
+function validateImportItem(item) {
+  const errors = [];
+  if (!item.category) errors.push('Thiếu category');
+  else if (!CATEGORIES[item.category]) errors.push(`Category "${item.category}" không hợp lệ (cần: hotel/cruise/xe/land/nh/tq/hdv/bh)`);
+  if (!item.name) errors.push('Thiếu tên');
+  if (!item.region) errors.push('Thiếu vùng');
+  return errors;
+}
+
+// ----- Preview rendering -----
+function renderBulkPreview() {
+  const okCount = bulkParsedItems.filter(p => p.ok).length;
+  const dupCount = bulkParsedItems.filter(p => p.isDuplicate).length;
+  const errCount = bulkParsedItems.filter(p => !p.ok && !p.isDuplicate).length;
+
+  document.getElementById('bulk-preview').style.display = 'block';
+  document.getElementById('bulk-preview-summary').innerHTML = `
+    <div class="preview-summary">
+      <span><strong>Tổng:</strong> ${bulkParsedItems.length} dòng</span>
+      <span class="ps-ok"><strong>✓ Hợp lệ:</strong> ${okCount}</span>
+      ${dupCount > 0 ? `<span class="ps-dup"><strong>⚠ Trùng mã:</strong> ${dupCount} (sẽ bỏ qua)</span>` : ''}
+      ${errCount > 0 ? `<span class="ps-err"><strong>✗ Lỗi:</strong> ${errCount}</span>` : ''}
+    </div>
+  `;
+
+  const list = bulkParsedItems.map(p => {
+    if (p.ok) {
+      const cat = CATEGORIES[p.item.category];
+      return `
+        <div class="preview-row ok">
+          <div class="pv-status">✓</div>
+          <div class="pv-code">${escapeHtml(p.item.code)}</div>
+          <div class="pv-name">${escapeHtml(p.item.name)}</div>
+          <div class="pv-cat">${cat.icon} ${cat.name} · ${escapeHtml(p.item.region)}</div>
+        </div>
+      `;
+    } else if (p.isDuplicate) {
+      return `
+        <div class="preview-row duplicate">
+          <div class="pv-status">⚠</div>
+          <div class="pv-code">${escapeHtml(p.item.code || '—')}</div>
+          <div class="pv-name">${escapeHtml(p.item.name || '(không tên)')}</div>
+          <div class="pv-error-msg">${escapeHtml(p.error)}</div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="preview-row error">
+          <div class="pv-status">✗</div>
+          <div class="pv-code">Dòng ${p.index}</div>
+          <div class="pv-name">${escapeHtml(p.item.name || '(không tên)')}</div>
+          <div class="pv-error-msg">${escapeHtml(p.error)}</div>
+        </div>
+      `;
+    }
+  }).join('');
+  document.getElementById('bulk-preview-list').innerHTML = list;
+
+  document.getElementById('bulk-import-btn').style.display = okCount > 0 ? 'inline-flex' : 'none';
+  document.getElementById('bulk-import-btn').textContent = `✓ Import ${okCount} NCC vào database`;
+}
+
+function confirmBulkImport() {
+  const okItems = bulkParsedItems.filter(p => p.ok);
+  if (okItems.length === 0) return toast('Không có item nào hợp lệ', 'error');
+
+  let added = 0;
+  okItems.forEach(p => {
+    const id = genId();
+    db.suppliers[id] = {
+      id,
+      ...p.item,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
+    };
+    added++;
+  });
+  saveDB();
+  closeBulkImport();
+  renderSupplierList();
+  updateCounts();
+  toast(`✓ Đã import ${added} NCC`, 'success');
+}
+
+// ----- Examples -----
+function loadJsonExample() {
+  const example = [
+    {
+      category: 'hotel',
+      name: 'La Siesta Premium Hang Bac',
+      region: 'Hà Nội',
+      contactName: 'Ms. Mai',
+      phone: '024 3935 1632',
+      email: 'sales@hanoielegancehotel.com',
+      vat: 8,
+      paymentDays: 15,
+      mst: '0101234567',
+      rating: 5,
+      notes: 'Phố cổ, BB tốt, có spa',
+      extras: {
+        stars: '4*',
+        roomClass: 'Premier',
+        roomType: 'DBL/TWN',
+        breakfast: 'BB',
+        minNights: 1,
+        priceLow: 1700000,
+        priceHigh: 2200000
+      }
+    },
+    {
+      category: 'xe',
+      name: 'Thắng Long Transport',
+      region: 'Miền Bắc',
+      contactName: 'A. Thắng',
+      phone: '0904 111 222',
+      email: 'thanglongbus@gmail.com',
+      vat: 8,
+      paymentDays: 7,
+      rating: 4,
+      notes: 'Đoàn 20-25 khách',
+      extras: {
+        vehicleType: 'Bus 29',
+        seats: 29,
+        year: 2022,
+        priceDayCity: 3500000,
+        priceLongHaul: 14000000,
+        priceTransfer: 700000,
+        driverEN: 'Không'
+      }
+    }
+  ];
+  document.getElementById('bulk-json').value = JSON.stringify(example, null, 2);
+}
+
+function loadCsvExample() {
+  const example = [
+    'category\tname\tregion\tcontactName\tphone\temail\tvat\tpaymentDays\trating\tnotes',
+    'hotel\tLa Siesta Premium\tHà Nội\tMs. Mai\t024 3935 1632\tsales@example.com\t8\t15\t5\tPhố cổ, BB tốt',
+    'xe\tThắng Long Transport\tMiền Bắc\tA. Thắng\t0904 111 222\tthanglongbus@gmail.com\t8\t7\t4\tĐoàn 20-25 khách',
+    'tq\tHoàng Thành Thăng Long\tHà Nội\tVăn phòng\t024 3734 5427\t\t0\t0\t4\tDi tích UNESCO'
+  ].join('\n');
+  document.getElementById('bulk-csv').value = example;
+}
+
+// ----- Prompt library -----
+const PROMPTS = {
+  hotel: `Bạn là trợ lý trích xuất dữ liệu cho công ty tour inbound Việt Nam. Tôi gửi file contract/rate sheet của một KHÁCH SẠN. Hãy đọc kỹ và trích xuất ra JSON format bên dưới.
+
+QUY TẮC:
+- Nếu thông tin không có trong file → để rỗng "" hoặc 0
+- "region" phải là 1 trong: Hà Nội, Ninh Bình, Hạ Long, Sapa, Mai Châu, Huế, Đà Nẵng, Hội An, Quy Nhơn, Nha Trang, Đà Lạt, Phú Quốc, Côn Đảo, HCM, Cần Thơ, Bến Tre, Châu Đốc, Tây Ninh
+- "vat" mặc định 8 (du lịch VN). Nếu file ghi VAT 10% thì để 10. Nếu không xuất hoá đơn để 0.
+- "priceLow" = giá thấp nhất mùa thấp điểm. "priceHigh" = giá cao nhất mùa cao điểm (peak/Tết). Đơn vị VNĐ/phòng/đêm.
+- "breakfast": BB (Bed & Breakfast) / HB (Half Board) / FB (Full Board) / Không
+- Bỏ qua các phòng đặc biệt như Presidential, chỉ lấy hạng phổ biến nhất (Deluxe hoặc Superior)
+
+JSON FORMAT:
+{
+  "category": "hotel",
+  "name": "Tên đầy đủ KS",
+  "region": "Vùng",
+  "contactName": "Họ tên người liên hệ (nếu có)",
+  "phone": "Số điện thoại",
+  "email": "Email",
+  "vat": 8,
+  "paymentDays": 15,
+  "mst": "MST nếu có",
+  "rating": 4,
+  "notes": "Đặc điểm nổi bật, vị trí, lưu ý đặc biệt (1-2 câu)",
+  "extras": {
+    "stars": "4*",
+    "roomClass": "Deluxe",
+    "roomType": "DBL/TWN",
+    "breakfast": "BB",
+    "minNights": 1,
+    "priceLow": 1400000,
+    "priceHigh": 1800000
+  }
+}
+
+Chỉ trả về JSON, không giải thích thêm.`,
+
+  cruise: `Bạn là trợ lý trích xuất dữ liệu cho công ty tour inbound Việt Nam. Tôi gửi file contract/rate sheet của một CRUISE (du thuyền). Hãy đọc kỹ và trích xuất ra JSON.
+
+QUY TẮC:
+- "region" thường là "Hạ Long" hoặc "Mekong"
+- "vat" mặc định 8
+- "priceLow"/"priceHigh" tính theo VNĐ/cabin (không phải /khách)
+- "cabinType" lấy hạng phòng phổ biến nhất (Deluxe / Suite)
+- "nights" số đêm cố định của gói (thường 1 hoặc 2)
+- "included" liệt kê ngắn gọn (vd "BB+L+D+Kayak+Cave")
+- "singleSupplement" phụ thu khi 1 khách ở 1 cabin
+
+JSON FORMAT:
+{
+  "category": "cruise",
+  "name": "Tên cruise",
+  "region": "Hạ Long",
+  "contactName": "...", "phone": "...", "email": "...",
+  "vat": 8, "paymentDays": 30, "mst": "", "rating": 5,
+  "notes": "Đặc điểm nổi bật",
+  "extras": {
+    "stars": "5*",
+    "cabinType": "Deluxe Balcony",
+    "nights": 2,
+    "included": "BB+L+D+Kayak+Cave",
+    "priceLow": 6500000,
+    "priceHigh": 7500000,
+    "singleSupplement": 1500000
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  xe: `Bạn là trợ lý trích xuất dữ liệu cho công ty tour inbound VN. Tôi gửi file báo giá của một đối tác VẬN CHUYỂN (xe). Trích xuất ra JSON.
+
+QUY TẮC:
+- "region" phải là 1 trong 3: Miền Bắc, Miền Trung, Miền Nam (tuỳ đối tác phục vụ chính)
+- "vehicleType" chọn 1: Sedan 4, Innova 7, Mini 16, Bus 29, Bus 35, Bus 45 (theo loại xe phổ biến nhất họ có)
+- "priceDayCity" giá thuê 1 ngày trong 1 thành phố (8-10 tiếng)
+- "priceLongHaul" giá 1 tuyến đường dài (vd HN-NB-HL, ĐN-Huế, SG-Mekong). Lấy tuyến phổ biến nhất.
+- "priceTransfer" giá đón hoặc tiễn sân bay
+- "driverEN" tài xế biết tiếng Anh: "Có" / "Không" / "Một số"
+
+JSON FORMAT:
+{
+  "category": "xe",
+  "name": "Tên đối tác",
+  "region": "Miền Bắc",
+  "contactName": "...", "phone": "...", "email": "...",
+  "vat": 8, "paymentDays": 7, "mst": "", "rating": 4,
+  "notes": "Tuyến chính họ chạy, đặc điểm",
+  "extras": {
+    "vehicleType": "Bus 45",
+    "seats": 45,
+    "year": 2023,
+    "priceDayCity": 4500000,
+    "priceLongHaul": 16500000,
+    "priceTransfer": 800000,
+    "driverEN": "Một số"
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  land: `Bạn là trợ lý trích xuất dữ liệu cho tour inbound VN. Tôi gửi file của một LAND DMC (đối tác địa phương cung cấp tour ngày/nhiều ngày). Trích xuất ra JSON.
+
+QUY TẮC:
+- "region" là vùng tour diễn ra
+- "days" số ngày của tour (1, 2, 3...)
+- "tourType" mô tả ngắn loại tour (vd "Củ Chi half-day", "Mekong 1 ngày")
+- "minPax" / "maxPax" số khách min/max
+- "included" liệt kê dịch vụ bao gồm
+- "excluded" dịch vụ KHÔNG bao gồm
+- "pricePerPax" giá / khách (theo min pax)
+- "language" ngôn ngữ HDV: EN, FR, EN/FR...
+
+JSON FORMAT:
+{
+  "category": "land",
+  "name": "Tên DMC",
+  "region": "HCM",
+  "contactName": "...", "phone": "...", "email": "...",
+  "vat": 8, "paymentDays": 15, "rating": 4,
+  "notes": "Đặc điểm",
+  "extras": {
+    "days": 1,
+    "tourType": "Mekong My Tho - Ben Tre",
+    "minPax": 4,
+    "maxPax": 25,
+    "included": "Xe + Thuyền + HDV + Ăn trưa + Vé",
+    "excluded": "Tip HDV",
+    "pricePerPax": 1200000,
+    "language": "EN/FR"
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  nh: `Trích xuất dữ liệu NHÀ HÀNG phục vụ đoàn từ file đính kèm. Trả về JSON.
+
+QUY TẮC:
+- "cuisine" chọn 1: VN truyền thống, Hải sản, Buffet, Á-Âu, Chay, Đặc sản vùng, Set khách Tây
+- "setSmall/setMedium/setLarge" giá set menu 3 mức (VNĐ/khách). Nếu chỉ có 1 menu thì điền vào setSmall.
+- "capacity" sức chứa max
+- "hasVIP": "Có" / "Không"
+- VAT thường 8% với NH lớn, 0 với NH nhỏ không xuất HĐ
+
+JSON FORMAT:
+{
+  "category": "nh",
+  "name": "Tên NH",
+  "region": "...",
+  "contactName": "...", "phone": "...", "email": "...",
+  "vat": 8, "paymentDays": 7, "rating": 4,
+  "notes": "...",
+  "extras": {
+    "cuisine": "VN truyền thống",
+    "setSmall": 250000,
+    "setMedium": 350000,
+    "setLarge": 450000,
+    "capacity": 200,
+    "hasVIP": "Có"
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  tq: `Trích xuất dữ liệu THAM QUAN (vé danh thắng/bảo tàng/công viên) từ file. Trả về JSON.
+
+QUY TẮC:
+- "type" chọn 1: Danh thắng, Di tích, Bảo tàng, Công viên, Show diễn, Khác
+- "priceAdult"/"priceChild" giá vé người lớn / trẻ em (VNĐ)
+- "hours" giờ mở cửa (vd "7:00-17:00")
+- "closedDay" ngày nghỉ trong tuần (vd "Thứ 2" hoặc "Không")
+- "needBooking": "Cần" / "Không"
+- VAT thường 0 với điểm nhà nước, 8 với khu giải trí tư nhân (Bà Nà, Sun World)
+
+JSON FORMAT:
+{
+  "category": "tq",
+  "name": "Tên điểm",
+  "region": "...",
+  "contactName": "Văn phòng / BQL", "phone": "...", "email": "",
+  "vat": 0, "paymentDays": 0, "rating": 4,
+  "notes": "Lưu ý đặc biệt",
+  "extras": {
+    "type": "Danh thắng",
+    "priceAdult": 250000,
+    "priceChild": 125000,
+    "hours": "7:00-17:00",
+    "closedDay": "Không",
+    "needBooking": "Không"
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  hdv: `Trích xuất dữ liệu HƯỚNG DẪN VIÊN (HDV freelance) từ file CV/profile. Trả về JSON.
+
+QUY TẮC:
+- "language": EN, FR, DE, ES, IT, JP, KR, CN, RU, EN/FR, EN/CN, Multi
+- "tourType": Văn hoá, Mạo hiểm, MICE, Cao cấp, Cooking class, Trekking, Luxury
+- "experience" số năm kinh nghiệm
+- "priceDay" giá / ngày (VNĐ)
+- "priceNight" phụ cấp đêm khi tour overnight
+- "license": Quốc tế, Nội địa, Không
+- HDV freelance thường vat=0, paymentDays=0
+
+JSON FORMAT:
+{
+  "category": "hdv",
+  "name": "Họ tên",
+  "region": "Hà Nội",
+  "contactName": "Họ tên (như name)", "phone": "...", "email": "...",
+  "vat": 0, "paymentDays": 0, "rating": 5,
+  "notes": "Chuyên môn, vùng chạy chính",
+  "extras": {
+    "language": "EN",
+    "tourType": "Văn hoá",
+    "experience": 8,
+    "priceDay": 900000,
+    "priceNight": 200000,
+    "license": "Quốc tế"
+  }
+}
+
+Chỉ trả về JSON.`,
+
+  bh: `Trích xuất dữ liệu BẢO HIỂM hoặc DỊCH VỤ KHÁC (quà tặng, in ấn, quay phim...) từ file. Trả về JSON.
+
+QUY TẮC:
+- "serviceType" chọn 1: Bảo hiểm, Quà tặng, In ấn, Quay phim, Phiên dịch, Y tế, Khác
+- "priceUnit" đơn giá (VNĐ/đơn vị: người, cái, gói...)
+- "coverage" mô tả bao gồm hoặc mức bồi thường (vd "BH du lịch 600tr/người")
+- Bảo hiểm thường vat=0
+
+JSON FORMAT:
+{
+  "category": "bh",
+  "name": "Tên đối tác",
+  "region": "Toàn quốc",
+  "contactName": "...", "phone": "...", "email": "...",
+  "vat": 0, "paymentDays": 30, "rating": 4,
+  "notes": "...",
+  "extras": {
+    "serviceType": "Bảo hiểm",
+    "priceUnit": 70000,
+    "coverage": "BH du lịch quốc tế 600tr/người"
+  }
+}
+
+Chỉ trả về JSON.`
+};
+
+function renderPromptCategorySelector() {
+  const grid = document.getElementById('prompt-cat-grid');
+  grid.innerHTML = Object.entries(CATEGORIES).map(([key, c]) =>
+    `<button class="prompt-cat-btn ${key === bulkPromptCategory ? 'active' : ''}" onclick="setPromptCategory('${key}')">${c.icon} ${c.name}</button>`
+  ).join('');
+  document.getElementById('bulk-prompt').value = PROMPTS[bulkPromptCategory];
+}
+
+function setPromptCategory(cat) {
+  bulkPromptCategory = cat;
+  renderPromptCategorySelector();
+}
+
+function copyPrompt() {
+  const txt = document.getElementById('bulk-prompt').value;
+  navigator.clipboard.writeText(txt).then(() => {
+    toast('✓ Đã copy prompt vào clipboard', 'success');
+  }).catch(() => {
+    // Fallback: select text
+    const el = document.getElementById('bulk-prompt');
+    el.select();
+    document.execCommand('copy');
+    toast('✓ Đã copy prompt', 'success');
+  });
+}
+
+// ============================================================
+// SEED — 20 sample suppliers
+// ============================================================
+function loadSamples() {
+  openConfirm('Nạp NCC mẫu',
+    'Sẽ thêm 20 NCC mẫu chuẩn ngành VN vào database. Các NCC hiện tại không bị xoá. Tiếp tục?',
+    () => {
+      const samples = getSampleData();
+      let added = 0;
+      samples.forEach(s => {
+        // Skip if code already exists
+        if (Object.values(db.suppliers).some(x => x.code === s.code)) return;
+        const id = genId();
+        db.suppliers[id] = { id, ...s, created: new Date().toISOString(), updated: new Date().toISOString() };
+        added++;
+      });
+      saveDB();
+      renderSupplierList();
+      updateCounts();
+      toast(`✓ Đã thêm ${added} NCC mẫu`, 'success');
+    }
+  );
+}
+
+function getSampleData() {
+  return [
+    // === GROUP B — Hotel: Contact + Drive folder ===
+    { category:'hotel', code:'HT-HN-001', name:'Le Jardin Hanoi', region:'Hà Nội', contactName:'Ms. Linh', phone:'0912 345 678', email:'sales@lejardin.vn', vat:8, paymentDays:15, rating:4, notes:'Gần Hoàn Kiếm, BB tốt', extras:{stars:'4*',roomCount:60,breakfast:'BB',driveFolderUrl:''} },
+    { category:'hotel', code:'HT-NB-001', name:'The Reed Ninh Binh', region:'Ninh Bình', contactName:'Mr. Hùng', phone:'0913 456 789', email:'reservation@thereedhotel.com', vat:8, paymentDays:15, rating:4, notes:'Trung tâm Ninh Bình', extras:{stars:'4*',roomCount:80,breakfast:'BB',driveFolderUrl:''} },
+    { category:'hotel', code:'HT-DN-001', name:'Parosand Da Nang', region:'Đà Nẵng', contactName:'Ms. Hằng', phone:'0916 789 012', email:'rsv@parosandhotel.com', vat:8, paymentDays:15, rating:4, notes:'Gần biển Mỹ Khê', extras:{stars:'4*',roomCount:120,breakfast:'BB',driveFolderUrl:''} },
+    { category:'hotel', code:'HT-HCM-001', name:'M City Hotel Saigon', region:'HCM', contactName:'Ms. Trang', phone:'0917 890 123', email:'sales@mcityhotel.vn', vat:8, paymentDays:30, rating:4, notes:'Q.1, gần Bến Thành', extras:{stars:'4*',roomCount:100,breakfast:'BB',driveFolderUrl:''} },
+
+    // === GROUP B — Cruise ===
+    { category:'cruise', code:'CR-HL-001', name:'Paradise Elegance Cruise', region:'Hạ Long', contactName:'Ms. Mai', phone:'0914 567 890', email:'booking@paradisecruise.com', vat:8, paymentDays:30, rating:5, notes:'Lan Hạ, cabin deluxe', extras:{stars:'5*',nights:2,driveFolderUrl:''} },
+
+    // === GROUP B — Xe ===
+    { category:'xe', code:'XE-MB-001', name:'Hai Nam Transport', region:'Miền Bắc', contactName:'A. Hải', phone:'0919 012 345', email:'hainam.transport@gmail.com', vat:8, paymentDays:7, rating:5, notes:'Chuyên HN-NB-HL, xe mới', extras:{vehicleTypes:'Innova 7 / Bus 16-45',driverEN:'Một số',driveFolderUrl:''} },
+    { category:'xe', code:'XE-MT-001', name:'Le Anh Travel Bus', region:'Miền Trung', contactName:'A. Anh', phone:'0905 123 456', email:'leanh.travel@gmail.com', vat:8, paymentDays:7, rating:5, notes:'Đà Nẵng - Huế - Hội An', extras:{vehicleTypes:'Mini 16 / Bus 29-45',driverEN:'Một số',driveFolderUrl:''} },
+
+    // === GROUP C — Land (file browser cho từng chương trình) ===
+    { category:'land', code:'LD-HCM-001', name:'Saigon Land Tour', region:'HCM', contactName:'A. Long', phone:'0908 111 222', email:'long.saigonland@gmail.com', vat:8, paymentDays:15, rating:4, notes:'Mạnh Mekong + Củ Chi', extras:{specialty:'Mekong, Củ Chi, City tour',language:'EN',mainFolderUrl:''} },
+
+    // === GROUP C — Nhà hàng ===
+    { category:'nh', code:'NH-HN-001', name:'Phở Lý Quốc Sư', region:'Hà Nội', contactName:'Anh chủ', phone:'0912 111 222', email:'', vat:0, paymentDays:0, rating:4, notes:'Không VAT, phù hợp bữa sáng', extras:{cuisine:'VN truyền thống',capacity:80,hasVIP:'Không',mainFolderUrl:''} },
+    { category:'nh', code:'NH-DN-001', name:'Bé Mặn Seafood', region:'Đà Nẵng', contactName:'A. Mặn', phone:'0903 555 777', email:'beman.dn@gmail.com', vat:8, paymentDays:7, rating:5, notes:'Đoàn Mỹ thích', extras:{cuisine:'Hải sản',capacity:200,hasVIP:'Có',mainFolderUrl:''} },
+
+    // === GROUP A — Vé tham quan (giá đầy đủ 2026 + 2027) ===
+    { category:'tq', code:'TQ-HN-001', name:'Văn Miếu - Quốc Tử Giám', region:'Hà Nội', contactName:'Văn phòng', phone:'024 3845 2917', email:'', vat:0, paymentDays:0, rating:4, notes:'Trẻ <16 nửa giá, <6 free', extras:{type:'Danh thắng',priceAdult2026:70000,priceChild2026:35000,priceAdult2027:0,priceChild2027:0,childAge:'6-15',hours:'8:00-17:00',closedDay:'Không',needBooking:'Không'} },
+    { category:'tq', code:'TQ-HN-002', name:'Hoàng Thành Thăng Long', region:'Hà Nội', contactName:'BQL', phone:'024 3734 5427', email:'', vat:0, paymentDays:0, rating:4, notes:'Di sản UNESCO', extras:{type:'Di tích',priceAdult2026:100000,priceChild2026:50000,priceAdult2027:0,priceChild2027:0,childAge:'6-15',hours:'8:00-17:00',closedDay:'Thứ 2',needBooking:'Không'} },
+    { category:'tq', code:'TQ-NB-001', name:'Tràng An', region:'Ninh Bình', contactName:'Văn phòng', phone:'0229 388 8889', email:'trangan@gov.vn', vat:0, paymentDays:0, rating:5, notes:'Vé gồm thuyền 3h', extras:{type:'Danh thắng',priceAdult2026:250000,priceChild2026:125000,priceAdult2027:0,priceChild2027:0,childAge:'6-11',hours:'7:00-17:00',closedDay:'Không',needBooking:'Không'} },
+    { category:'tq', code:'TQ-NB-002', name:'Hang Múa', region:'Ninh Bình', contactName:'Văn phòng', phone:'0229 360 0000', email:'', vat:0, paymentDays:0, rating:5, notes:'486 bậc, view đẹp', extras:{type:'Danh thắng',priceAdult2026:100000,priceChild2026:50000,priceAdult2027:0,priceChild2027:0,childAge:'6-11',hours:'6:00-19:00',closedDay:'Không',needBooking:'Không'} },
+    { category:'tq', code:'TQ-HU-001', name:'Đại Nội Huế', region:'Huế', contactName:'BQL Di tích Huế', phone:'0234 351 3818', email:'', vat:0, paymentDays:0, rating:5, notes:'Vé combo nhiều điểm có giảm', extras:{type:'Di tích',priceAdult2026:200000,priceChild2026:40000,priceAdult2027:0,priceChild2027:0,childAge:'6-12',hours:'7:00-17:30',closedDay:'Không',needBooking:'Không'} },
+    { category:'tq', code:'TQ-DN-001', name:'Sun World Bà Nà Hills', region:'Đà Nẵng', contactName:'Sales B2B', phone:'0236 374 9888', email:'b2b@bana.sunworld.vn', vat:8, paymentDays:0, rating:5, notes:'Đặt trước, có VAT, giảm 5-10% cho B2B', extras:{type:'Công viên',priceAdult2026:1100000,priceChild2026:900000,priceAdult2027:0,priceChild2027:0,childAge:'1m-1m4',hours:'7:30-22:00',closedDay:'Không',needBooking:'Cần'} },
+    { category:'tq', code:'TQ-HCM-001', name:'Củ Chi Tunnels (Bến Đình)', region:'HCM', contactName:'Văn phòng', phone:'028 7948 7849', email:'', vat:0, paymentDays:0, rating:4, notes:'Free trẻ <7', extras:{type:'Di tích',priceAdult2026:125000,priceChild2026:50000,priceAdult2027:0,priceChild2027:0,childAge:'7-15',hours:'7:00-17:00',closedDay:'Không',needBooking:'Không'} },
+
+    // === GROUP A — HDV cộng tác viên (đơn giản, không nhập giá) ===
+    { category:'hdv', code:'HD-HN-001', name:'Nguyễn Văn Minh', region:'Hà Nội', contactName:'A. Minh', phone:'0987 111 222', email:'minh.guide.hn@gmail.com', vat:0, paymentDays:0, rating:5, notes:'HDV tiếng Anh, chuyên Bắc, đoàn Mỹ', extras:{language:'EN',languageOther:'',specialty:'Văn hoá Bắc, đoàn Mỹ',experience:8,license:'Quốc tế',collabHistory:'Tour Mỹ T3/2026 (Mr. John), đoàn Úc T5/2026'} },
+    { category:'hdv', code:'HD-HU-001', name:'Trần Đức Long', region:'Huế', contactName:'A. Long', phone:'0905 555 666', email:'long.hue.guide@gmail.com', vat:0, paymentDays:0, rating:5, notes:'Chuyên Huế-Đà Nẵng', extras:{language:'EN',languageOther:'FR',specialty:'Văn hoá Huế-ĐN',experience:10,license:'Quốc tế',collabHistory:''} },
+
+    // === GROUP A — BH + Khác ===
+    { category:'bh', code:'BH-VN-001', name:'AIG Vietnam Insurance', region:'Toàn quốc', contactName:'Ms. Yến', phone:'028 3829 0888', email:'travel@aig.com.vn', vat:0, paymentDays:30, rating:5, notes:'Phổ biến cho inbound', extras:{serviceType:'Bảo hiểm',priceUnit:70000,unit:'người',coverage:'BH du lịch quốc tế 600tr/người'} },
+    { category:'bh', code:'BH-VN-002', name:'Quà tặng Nón Lá', region:'Toàn quốc', contactName:'Ms. Hà', phone:'0904 555 666', email:'nonla.giftvn@gmail.com', vat:8, paymentDays:15, rating:4, notes:'Min đặt 50 cái, có logo công ty', extras:{serviceType:'Quà tặng',priceUnit:25000,unit:'cái',coverage:'Nón lá VN có in logo + tag tên công ty'} }
+  ];
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) {
+  return String(s ?? '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('confirm-backdrop').classList.contains('show')) {
+      closeConfirm();
+    } else if (document.getElementById('drawer').classList.contains('show')) {
+      closeDrawer();
+    }
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  setView('all');
+  updateCounts();
+});
+</script>
+</body>
+</html>
