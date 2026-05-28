@@ -809,23 +809,6 @@
   </div>
 </div>
 
-<!-- ===== Generate Quote modal ===== -->
-<div class="modal-backdrop" id="gen-quote-backdrop" onclick="closeGenQuote(event)">
-  <div class="modal" style="max-width:480px" onclick="event.stopPropagation()">
-    <div class="modal-head">
-      <h2>🚀 Tạo Quote từ tour này</h2>
-      <button class="btn ghost" onclick="closeGenQuote()" style="font-size:18px; padding:4px 10px">×</button>
-    </div>
-    <div class="modal-body" id="gen-quote-body">
-      <!-- Injected -->
-    </div>
-    <div class="modal-foot">
-      <button class="btn ghost" onclick="closeGenQuote()">Huỷ</button>
-      <button class="btn accent" onclick="generateQuote()">Tạo Quote →</button>
-    </div>
-  </div>
-</div>
-
 <!-- Confirm dialog -->
 <div class="confirm-backdrop" id="confirm-backdrop">
   <div class="confirm-box">
@@ -927,6 +910,8 @@ function render() {
     renderCatalog();
   } else if (currentView === 'detail') {
     renderDetail();
+  } else if (currentView === 'calc') {
+    renderCostCalc();
   }
 }
 
@@ -988,7 +973,7 @@ function renderCard(t) {
             <div class="tour-price-from">From</div>
             <div class="tour-price-val">${fmt(minPrice, cur)}<span class="tour-price-unit">/pax</span></div>
           </div>
-          <button class="btn sm primary" onclick="event.stopPropagation(); openGenQuote('${t.id}')">🚀 Quote</button>
+          <button class="btn sm primary" onclick="event.stopPropagation(); setView('calc', '${t.id}')">🧮 Tính giá</button>
         </div>
       </div>
       <div class="tour-card-actions">
@@ -1170,8 +1155,8 @@ function renderDetail() {
             ${t.priceNote ? `<div class="hint" style="margin-top:10px; font-size:11px; color:var(--ink-soft); font-style:italic">${escapeHtml(t.priceNote)}</div>` : ''}
           </div>
           <div class="pricing-actions">
-            <button class="btn accent lg" onclick="openGenQuote('${t.id}')">🚀 Tạo Quote</button>
-            <div class="hint" style="text-align:center; font-size:10.5px">Mở QuoteBuilder với data đã pre-fill</div>
+            <button class="btn accent lg" onclick="setView('calc', '${t.id}')">🧮 Chiết tính giá</button>
+            <div class="hint" style="text-align:center; font-size:10.5px">Mở bảng chiết tính chi tiết cho tour này</div>
           </div>
         </div>
       </div>
@@ -1181,8 +1166,342 @@ function renderDetail() {
 }
 
 // ============================================================
-// ADD/EDIT MODAL
+// COST CALCULATOR (chiết tính giá embedded trong tour)
+// Mỗi tour có 1 chiết tính lưu trong tour.calc
 // ============================================================
+function renderCostCalc() {
+  const t = db.tours[currentTourId];
+  if (!t) { setView('catalog'); return; }
+
+  // Init calc if not exists
+  if (!t.calc) {
+    t.calc = createBlankCalc(t);
+    saveDB();
+  }
+
+  document.getElementById('crumbs').innerHTML = `<a onclick="setView('catalog')">Catalog</a> / <a onclick="setView('detail','${t.id}')">${escapeHtml(t.name)}</a> / <strong>🧮 Chiết tính giá</strong>`;
+
+  const c = t.calc;
+  const cur = c.currency || t.currency || 'USD';
+  const pax = c.pax || 6;
+  const tierKey = c.hotelTier || (t.hotelTiers?.[1]?.key || '4star');
+  const tierLabel = t.hotelTiers?.find(h => h.key === tierKey)?.label || tierKey;
+  const pricePerPax = t.priceGrid?.[tierKey]?.[pax] || 0;
+  const totalRevenue = pricePerPax * pax;
+
+  // Calculate totals
+  const totalCost = (c.costs || []).reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
+  const grossMargin = totalRevenue - totalCost;
+  const grossMarginPct = totalRevenue > 0 ? (grossMargin / totalRevenue) * 100 : 0;
+
+  // Accounting calculations (simplified, in % of revenue)
+  const vatOutRate = c.vatOutRate || 8;
+  const vatInRate = c.vatInRate || 5; // average VAT input from suppliers
+  const cit = c.citRate || 20;
+  const opsBonus = c.opsBonusRate || 3;
+  const otherOverhead = c.overheadRate || 5;
+
+  const revenueExVat = totalRevenue / (1 + vatOutRate/100);
+  const vatOut = totalRevenue - revenueExVat;
+  const vatIn = totalCost * (vatInRate/100); // estimate
+  const vatPayable = Math.max(0, vatOut - vatIn);
+  const opsBonusAmt = revenueExVat * (opsBonus/100);
+  const overheadAmt = revenueExVat * (otherOverhead/100);
+  const profitBeforeCit = revenueExVat - totalCost - opsBonusAmt - overheadAmt;
+  const citAmt = Math.max(0, profitBeforeCit) * (cit/100);
+  const netProfit = profitBeforeCit - citAmt;
+  const netProfitPct = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+  const html = `
+    <div style="margin-bottom:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+      <button class="btn ghost" onclick="setView('detail','${t.id}')">← Quay về tour</button>
+      <div style="flex:1; min-width:200px">
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:22px; letter-spacing:-.02em">🧮 Chiết tính giá</div>
+        <div style="font-size:12.5px; color:var(--ink-soft)">Tour · <strong style="color:var(--ink); font-family:'JetBrains Mono',monospace">${escapeHtml(t.code)}</strong> · ${escapeHtml(t.name)}</div>
+      </div>
+      <button class="btn" onclick="exportCalcExcel('${t.id}')">📊 Export Excel</button>
+      <button class="btn" onclick="window.print()">🖨 Print PDF</button>
+    </div>
+
+    <!-- Configuration bar -->
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin-bottom:20px">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-bottom:12px">⚙ Cấu hình tính giá</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px">
+        <div class="form-field">
+          <label>Số pax</label>
+          <select onchange="updateCalc('pax', parseInt(this.value))">
+            ${(t.paxTiers || DEFAULT_PAX_TIERS).map(p => `<option value="${p}" ${pax===p?'selected':''}>${p} pax</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Hạng KS</label>
+          <select onchange="updateCalc('hotelTier', this.value)">
+            ${(t.hotelTiers || DEFAULT_HOTEL_TIERS).map(h => `<option value="${h.key}" ${tierKey===h.key?'selected':''}>${escapeHtml(h.label)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Ngày khởi hành</label>
+          <input type="date" value="${c.startDate || ''}" onchange="updateCalc('startDate', this.value)">
+        </div>
+        <div class="form-field">
+          <label>Tên khách</label>
+          <input type="text" value="${escapeAttr(c.customer || '')}" placeholder="Mr. John / ABC Travel" onchange="updateCalc('customer', this.value)">
+        </div>
+        <div class="form-field">
+          <label>Loại tiền</label>
+          <select onchange="updateCalc('currency', this.value)">
+            ${CURRENCIES.map(cc => `<option value="${cc.code}" ${cur===cc.code?'selected':''}>${cc.flag} ${cc.code}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px">
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px">
+        <div style="font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:4px">Doanh thu</div>
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:var(--ink); font-variant-numeric:tabular-nums">${fmt(totalRevenue, cur)}</div>
+        <div style="font-size:11px; color:var(--ink-soft); margin-top:2px">${fmt(pricePerPax, cur)}/pax × ${pax} pax</div>
+      </div>
+      <div style="background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px">
+        <div style="font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:4px">Chi phí NCC</div>
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:#991b1b; font-variant-numeric:tabular-nums">${fmt(totalCost, cur)}</div>
+        <div style="font-size:11px; color:var(--ink-soft); margin-top:2px">${(c.costs || []).length} dòng chi phí</div>
+      </div>
+      <div style="background:${grossMargin >= 0 ? 'var(--success-soft)' : '#fef2f2'}; border:1px solid ${grossMargin >= 0 ? '#a7f3d0' : '#fecaca'}; border-radius:10px; padding:14px 16px">
+        <div style="font-size:10.5px; color:${grossMargin >= 0 ? 'var(--success)' : '#991b1b'}; text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:4px">Lãi gộp</div>
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:${grossMargin >= 0 ? 'var(--success)' : '#991b1b'}; font-variant-numeric:tabular-nums">${fmt(grossMargin, cur)}</div>
+        <div style="font-size:11px; color:${grossMargin >= 0 ? 'var(--success)' : '#991b1b'}; margin-top:2px">${grossMarginPct.toFixed(1)}% doanh thu</div>
+      </div>
+      <div style="background:${netProfit >= 0 ? 'var(--gold-soft)' : '#fef2f2'}; border:1px solid ${netProfit >= 0 ? '#fcd34d' : '#fecaca'}; border-radius:10px; padding:14px 16px">
+        <div style="font-size:10.5px; color:var(--gold); text-transform:uppercase; letter-spacing:.06em; font-weight:600; margin-bottom:4px">Lãi ròng</div>
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:20px; color:${netProfit >= 0 ? 'var(--gold)' : '#991b1b'}; font-variant-numeric:tabular-nums">${fmt(netProfit, cur)}</div>
+        <div style="font-size:11px; color:var(--gold); margin-top:2px">${netProfitPct.toFixed(1)}% sau VAT+CIT</div>
+      </div>
+    </div>
+
+    <!-- Cost detail table -->
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:20px">
+      <div style="padding:14px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center">
+        <div>
+          <div style="font-family:'Fraunces',serif; font-weight:600; font-size:16px">📋 Chi tiết chi phí NCC</div>
+          <div style="font-size:11.5px; color:var(--ink-soft)">Liệt kê từng khoản chi phí trả cho NCC theo ngày tour</div>
+        </div>
+        <button class="btn primary sm" onclick="addCostRow()">＋ Thêm dòng</button>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px">
+        <thead style="background:var(--section)">
+          <tr>
+            <th style="text-align:left; padding:10px 14px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); width:50px">Day</th>
+            <th style="text-align:left; padding:10px 14px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); width:140px">Loại</th>
+            <th style="text-align:left; padding:10px 14px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft)">Mô tả / NCC</th>
+            <th style="text-align:right; padding:10px 14px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); width:160px">Số tiền (${cur})</th>
+            <th style="width:50px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(c.costs || []).length === 0 ? `
+            <tr><td colspan="5" style="padding:30px; text-align:center; color:var(--ink-soft); font-style:italic">
+              Chưa có dòng chi phí. Bấm "＋ Thêm dòng" để bắt đầu.<br>
+              <span style="font-size:11px">VD: Day 1 · Khách sạn · Le Jardin Hanoi 4* × 3 phòng × 1 đêm · ${cur === 'VND' ? '5.400.000' : '210'}</span>
+            </td></tr>
+          ` : (c.costs || []).map((row, i) => `
+            <tr style="border-top:1px solid var(--line)">
+              <td style="padding:6px 10px"><input type="number" value="${row.day || 1}" min="1" style="width:100%; border:1px solid var(--line); padding:5px 7px; border-radius:5px; font-size:12px; text-align:center" onchange="updateCostRow(${i}, 'day', parseInt(this.value))"></td>
+              <td style="padding:6px 10px"><input type="text" value="${escapeAttr(row.category || '')}" placeholder="Hotel / Xe / Vé..." style="width:100%; border:1px solid var(--line); padding:5px 7px; border-radius:5px; font-size:12px" onchange="updateCostRow(${i}, 'category', this.value)"></td>
+              <td style="padding:6px 10px"><input type="text" value="${escapeAttr(row.desc || '')}" placeholder="Mô tả chi tiết..." style="width:100%; border:1px solid var(--line); padding:5px 7px; border-radius:5px; font-size:12px" onchange="updateCostRow(${i}, 'desc', this.value)"></td>
+              <td style="padding:6px 10px"><input type="number" value="${row.amount || ''}" placeholder="0" style="width:100%; border:1px solid var(--line); padding:5px 7px; border-radius:5px; font-size:12px; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:600; color:#991b1b" onchange="updateCostRow(${i}, 'amount', parseFloat(this.value) || 0)"></td>
+              <td style="padding:6px 10px; text-align:center"><button class="btn sm danger" onclick="removeCostRow(${i})" title="Xoá">×</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+        ${(c.costs || []).length > 0 ? `
+          <tfoot style="background:var(--section); font-weight:700">
+            <tr style="border-top:2px solid var(--ink)">
+              <td colspan="3" style="padding:12px 14px; text-align:right; font-size:12px; text-transform:uppercase; letter-spacing:.04em">Tổng chi phí NCC</td>
+              <td style="padding:12px 14px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:14px; color:#991b1b">${fmt(totalCost, cur)}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        ` : ''}
+      </table>
+    </div>
+
+    <!-- Accounting / Markup -->
+    <div style="background:var(--paper); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:20px">
+      <div style="padding:14px 22px; border-bottom:1px solid var(--line)">
+        <div style="font-family:'Fraunces',serif; font-weight:600; font-size:16px">📊 Kế toán & lãi/lỗ</div>
+        <div style="font-size:11.5px; color:var(--ink-soft)">Tính VAT theo TT 219/2013 (giá đã gồm VAT) · CIT 20%</div>
+      </div>
+      <div style="padding:18px 22px">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:14px; margin-bottom:18px">
+          <div class="form-field">
+            <label>VAT đầu ra (%)</label>
+            <input type="number" step="0.5" value="${vatOutRate}" onchange="updateCalc('vatOutRate', parseFloat(this.value)||0)">
+          </div>
+          <div class="form-field">
+            <label>VAT đầu vào TB (%)</label>
+            <input type="number" step="0.5" value="${vatInRate}" onchange="updateCalc('vatInRate', parseFloat(this.value)||0)">
+          </div>
+          <div class="form-field">
+            <label>Bonus điều hành (%)</label>
+            <input type="number" step="0.5" value="${opsBonus}" onchange="updateCalc('opsBonusRate', parseFloat(this.value)||0)">
+          </div>
+          <div class="form-field">
+            <label>Overhead khác (%)</label>
+            <input type="number" step="0.5" value="${otherOverhead}" onchange="updateCalc('overheadRate', parseFloat(this.value)||0)">
+          </div>
+          <div class="form-field">
+            <label>CIT (%)</label>
+            <input type="number" step="0.5" value="${cit}" onchange="updateCalc('citRate', parseFloat(this.value)||0)">
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; font-size:13px">
+          <tbody>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft)">Doanh thu (đã gồm VAT)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:600">${fmt(totalRevenue, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft); padding-left:18px">– VAT đầu ra (${vatOutRate}%)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#991b1b">−${fmt(vatOut, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line); background:var(--section)">
+              <td style="padding:8px 0; padding-left:18px; font-weight:600">Doanh thu chưa VAT</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:600">${fmt(revenueExVat, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft)">– Chi phí NCC (đã gồm VAT)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#991b1b">−${fmt(totalCost, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft); padding-left:18px">+ VAT đầu vào khấu trừ (${vatInRate}%)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:var(--success)">+${fmt(vatIn, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft)">– Bonus điều hành (${opsBonus}%)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#991b1b">−${fmt(opsBonusAmt, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft)">– Overhead khác (${otherOverhead}%)</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#991b1b">−${fmt(overheadAmt, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--ink); background:var(--gold-soft)">
+              <td style="padding:10px 0; font-weight:700">Lãi trước thuế TNDN</td>
+              <td style="padding:10px 0; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--gold)">${fmt(profitBeforeCit, cur)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:8px 0; color:var(--ink-soft)">– CIT ${cit}%</td>
+              <td style="padding:8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#991b1b">−${fmt(citAmt, cur)}</td>
+            </tr>
+            <tr style="background:${netProfit >= 0 ? 'var(--success-soft)' : '#fef2f2'}">
+              <td style="padding:14px 0; font-family:'Fraunces',serif; font-weight:700; font-size:15px">LÃI RÒNG (sau thuế)</td>
+              <td style="padding:14px 0; text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; color:${netProfit >= 0 ? 'var(--success)' : '#991b1b'}">${fmt(netProfit, cur)} (${netProfitPct.toFixed(1)}%)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:16px; padding:12px 14px; background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:6px; font-size:12px; line-height:1.6">
+          <strong>💡 Lưu ý:</strong> VAT đầu vào là ước tính trung bình. Thực tế tính theo hoá đơn từng NCC. VAT phải nộp = max(0, VAT đầu ra − VAT đầu vào thực tế) = max(0, ${fmt(vatOut, cur)} − ${fmt(vatIn, cur)}) = <strong>${fmt(vatPayable, cur)}</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding:20px; font-size:11.5px; color:var(--ink-soft)">
+      💾 Chiết tính tự lưu vào tour · Lần cập nhật cuối: ${c.updated ? new Date(c.updated).toLocaleString('vi-VN') : 'chưa lưu'}
+    </div>
+  `;
+  document.getElementById('page-content').innerHTML = html;
+}
+
+function createBlankCalc(t) {
+  return {
+    pax: t.paxTiers?.[2] || 6, // default to 3rd tier (often 6 pax)
+    hotelTier: t.hotelTiers?.[1]?.key || '4star',
+    startDate: '',
+    customer: '',
+    currency: t.currency || 'USD',
+    costs: [],
+    vatOutRate: 8,
+    vatInRate: 5,
+    opsBonusRate: 3,
+    overheadRate: 5,
+    citRate: 20,
+    updated: new Date().toISOString()
+  };
+}
+
+function updateCalc(key, value) {
+  const t = db.tours[currentTourId];
+  if (!t || !t.calc) return;
+  t.calc[key] = value;
+  t.calc.updated = new Date().toISOString();
+  saveDB();
+  renderCostCalc();
+}
+
+function addCostRow() {
+  const t = db.tours[currentTourId];
+  if (!t || !t.calc) return;
+  if (!t.calc.costs) t.calc.costs = [];
+  t.calc.costs.push({ day: 1, category: '', desc: '', amount: 0 });
+  t.calc.updated = new Date().toISOString();
+  saveDB();
+  renderCostCalc();
+}
+
+function updateCostRow(idx, key, value) {
+  const t = db.tours[currentTourId];
+  if (!t || !t.calc || !t.calc.costs[idx]) return;
+  t.calc.costs[idx][key] = value;
+  t.calc.updated = new Date().toISOString();
+  saveDB();
+  // Don't re-render to keep input focus, just update totals
+  if (key === 'amount') renderCostCalc();
+}
+
+function removeCostRow(idx) {
+  const t = db.tours[currentTourId];
+  if (!t || !t.calc) return;
+  t.calc.costs.splice(idx, 1);
+  t.calc.updated = new Date().toISOString();
+  saveDB();
+  renderCostCalc();
+}
+
+function exportCalcExcel(tourId) {
+  const t = db.tours[tourId];
+  if (!t || !t.calc) return;
+  const c = t.calc;
+  const cur = c.currency || 'USD';
+
+  // Build CSV (Excel will open it)
+  const lines = [];
+  lines.push(`Chiết tính giá tour: ${t.code} - ${t.name}`);
+  lines.push(`Khách hàng:,${c.customer || 'TBD'}`);
+  lines.push(`Ngày khởi hành:,${c.startDate || ''}`);
+  lines.push(`Số pax:,${c.pax}`);
+  lines.push(`Hạng KS:,${t.hotelTiers?.find(h => h.key === c.hotelTier)?.label || c.hotelTier}`);
+  lines.push(`Loại tiền:,${cur}`);
+  lines.push('');
+  lines.push('Day,Loại,Mô tả/NCC,Số tiền');
+  (c.costs || []).forEach(row => {
+    lines.push(`${row.day || 1},"${(row.category || '').replace(/"/g, '""')}","${(row.desc || '').replace(/"/g, '""')}",${row.amount || 0}`);
+  });
+  const totalCost = (c.costs || []).reduce((sum, row) => sum + (parseFloat(row.amount) || 0), 0);
+  lines.push(`,,Tổng chi phí NCC,${totalCost}`);
+
+  const csv = '\uFEFF' + lines.join('\n'); // BOM for UTF-8
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `chiet-tinh-${t.code}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('✓ Đã export Excel/CSV', 'success');
+}
+
+
 function openModal(tourId = null) {
   editingTour = tourId ? JSON.parse(JSON.stringify(db.tours[tourId])) : createBlankTour();
   document.getElementById('modal-title').textContent = tourId ? 'Chỉnh sửa tour' : 'Thêm tour mới';
@@ -1495,126 +1814,6 @@ function confirmDelete(id) {
   });
 }
 
-// ============================================================
-// GENERATE QUOTE → Connect to QuoteBuilder
-// ============================================================
-function openGenQuote(tourId) {
-  const t = db.tours[tourId];
-  if (!t) return;
-  const cur = t.currency || 'USD';
-  const paxTiers = t.paxTiers || DEFAULT_PAX_TIERS;
-  const hotelTiers = t.hotelTiers || DEFAULT_HOTEL_TIERS;
-
-  document.getElementById('gen-quote-body').innerHTML = `
-    <div class="hint" style="background:var(--accent-soft); border-left:3px solid var(--accent); padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:12.5px; line-height:1.6; color:var(--ink); font-style:normal">
-      <strong>Chọn cấu hình tour cho khách này.</strong> Hệ thống sẽ tạo Quote pre-filled với data đã chọn (số khách, hạng KS, ngày), sau đó bạn có thể chỉnh chi tiết trong QuoteBuilder.
-    </div>
-    <div class="gen-quote-form">
-      <div class="form-field">
-        <label>Tour:</label>
-        <input type="text" value="${escapeAttr(t.code + ' — ' + t.name)}" readonly style="background:var(--section)">
-      </div>
-      <div class="form-field">
-        <label>Số pax:</label>
-        <select id="gq-pax">
-          ${paxTiers.map(p => `<option value="${p}">${p} pax</option>`).join('')}
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Hạng KS:</label>
-        <select id="gq-tier">
-          ${hotelTiers.map(ht => `<option value="${ht.key}">${ht.label}</option>`).join('')}
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Ngày khởi hành:</label>
-        <input type="date" id="gq-startDate" value="${new Date(Date.now() + 30*86400000).toISOString().slice(0,10)}">
-      </div>
-      <div class="form-field">
-        <label>Tên khách / agent:</label>
-        <input type="text" id="gq-customer" placeholder="VD: Mr. John Smith / Travelocity Inc.">
-      </div>
-      <div class="form-field">
-        <label>Loại tiền:</label>
-        <select id="gq-currency">
-          ${CURRENCIES.map(c => `<option value="${c.code}" ${cur === c.code ? 'selected' : ''}>${c.flag} ${c.code}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-  `;
-  document.getElementById('gen-quote-backdrop').classList.add('show');
-  document.getElementById('gen-quote-backdrop').dataset.tourId = tourId;
-}
-
-function closeGenQuote(e) {
-  if (e && e.target.id !== 'gen-quote-backdrop') return;
-  document.getElementById('gen-quote-backdrop').classList.remove('show');
-}
-
-function generateQuote() {
-  const tourId = document.getElementById('gen-quote-backdrop').dataset.tourId;
-  const t = db.tours[tourId];
-  if (!t) return;
-
-  const pax = parseInt(document.getElementById('gq-pax').value);
-  const tier = document.getElementById('gq-tier').value;
-  const startDate = document.getElementById('gq-startDate').value;
-  const customer = document.getElementById('gq-customer').value.trim() || 'TBD';
-  const currency = document.getElementById('gq-currency').value;
-
-  const pricePerPax = t.priceGrid?.[tier]?.[pax] || 0;
-  const hotelLabel = t.hotelTiers?.find(h => h.key === tier)?.label || tier;
-
-  // Build quote payload — format that QuoteBuilder can recognize
-  const quotePayload = {
-    source: 'TourCatalog',
-    tourCode: t.code,
-    tourName: t.name,
-    tourId: t.id,
-    customer,
-    startDate,
-    days: t.days,
-    pax,
-    hotelTier: hotelLabel,
-    currency,
-    pricePerPax,
-    totalRevenue: pricePerPax * pax,
-    itinerary: t.itinerary,
-    included: t.included,
-    excluded: t.excluded,
-    notes: t.notes,
-    region: t.region,
-    type: t.type,
-    generatedAt: new Date().toISOString()
-  };
-
-  // Save payload to localStorage where QuoteBuilder can pick it up
-  try {
-    localStorage.setItem('qb_pending_import', JSON.stringify(quotePayload));
-  } catch (e) {
-    toast('Không thể chuẩn bị data: ' + e.message, 'error');
-    return;
-  }
-
-  closeGenQuote();
-
-  // Show success + instructions
-  toast('✓ Quote payload đã sẵn sàng', 'success');
-
-  // Open QuoteBuilder
-  setTimeout(() => {
-    openConfirm(
-      '🚀 Mở QuoteBuilder?',
-      `Data đã chuẩn bị: ${t.code} · ${pax} pax · ${hotelLabel} · ${currency} ${pricePerPax}/pax. QuoteBuilder sẽ tự nhận data này khi mở. Nếu QuoteBuilder mở ở tab khác, mở thủ công và bấm "Import từ Catalog".`,
-      () => {
-        // Try to open QuoteBuilder in new tab
-        window.open('bao_gia_tour_inbound.html', '_blank');
-      }
-    );
-    document.getElementById('confirm-ok').textContent = '🚀 Mở QuoteBuilder';
-    document.getElementById('confirm-ok').className = 'btn primary';
-  }, 300);
-}
 
 // ============================================================
 // EXPORT BROCHURE (basic PDF print)
@@ -1922,7 +2121,6 @@ function escapeAttr(s) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (document.getElementById('confirm-backdrop').classList.contains('show')) closeConfirm();
-    else if (document.getElementById('gen-quote-backdrop').classList.contains('show')) closeGenQuote();
     else if (document.getElementById('modal-backdrop').classList.contains('show')) closeModal();
   }
 });

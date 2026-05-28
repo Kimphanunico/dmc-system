@@ -509,7 +509,7 @@
       Hệ thống vận hành tour inbound số hoá.
     </h1>
     <p class="hero-subtitle" id="hero-subtitle">
-      3 module liên kết — quản lý nhà cung cấp, sản phẩm tour, và tính giá báo giá khách. Tất cả trong 1 hệ thống.
+      2 module liên kết — sản phẩm tour bán sẵn (kèm chiết tính giá) + database nhà cung cấp. Đơn giản, đủ dùng.
     </p>
     <div class="hero-user" id="user-pill">
       <div class="hero-user-avatar" id="user-avatar">B</div>
@@ -530,32 +530,9 @@
     <button class="btn accent" onclick="openSettings()">Cài đặt ngay →</button>
   </div>
 
-  <!-- 3 main modules -->
+  <!-- 2 main modules -->
   <h2 class="section-title">Các module chính</h2>
-  <div class="modules-grid">
-
-    <a class="module-card supplier" href="SupplierHub.html">
-      <div class="module-icon-wrap">
-        <div class="module-icon">📁</div>
-        <div class="module-arrow">→</div>
-      </div>
-      <h3 class="module-name">Supplier Hub</h3>
-      <p class="module-desc">Database nhà cung cấp (Hotel, Cruise, Vận chuyển, Land DMC, Nhà hàng, Tham quan, HDV, Bảo hiểm).</p>
-      <div class="module-stats">
-        <div class="module-stat">
-          <div class="stat-num" id="stat-suppliers">—</div>
-          <div class="stat-label">NCC</div>
-        </div>
-        <div class="module-stat">
-          <div class="stat-num" id="stat-tq">—</div>
-          <div class="stat-label">Vé tham quan</div>
-        </div>
-        <div class="module-stat">
-          <div class="stat-num" id="stat-hdv">—</div>
-          <div class="stat-label">HDV cộng tác</div>
-        </div>
-      </div>
-    </a>
+  <div class="modules-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 880px;">
 
     <a class="module-card catalog" href="TourCatalog.html">
       <div class="module-icon-wrap">
@@ -563,7 +540,7 @@
         <div class="module-arrow">→</div>
       </div>
       <h3 class="module-name">Tour Catalog</h3>
-      <p class="module-desc">Sản phẩm tour bán sẵn — có chương trình, ảnh, price grid theo pax × hạng KS. Bấm <em>Generate Quote</em> để tính giá nhanh.</p>
+      <p class="module-desc">Sản phẩm tour bán sẵn — chương trình, ảnh, price grid theo pax × hạng KS. <strong style="color:var(--accent)">Bao gồm chiết tính giá bên trong từng tour.</strong></p>
       <div class="module-stats">
         <div class="module-stat">
           <div class="stat-num" id="stat-tours">—</div>
@@ -580,28 +557,29 @@
       </div>
     </a>
 
-    <a class="module-card quote" href="QuoteBuilder.html">
+    <a class="module-card supplier" href="SupplierHub.html">
       <div class="module-icon-wrap">
-        <div class="module-icon">💰</div>
+        <div class="module-icon">📁</div>
         <div class="module-arrow">→</div>
       </div>
-      <h3 class="module-name">Quote Builder</h3>
-      <p class="module-desc">Tính giá chi tiết cho từng đoàn — VAT 8%, CIT 20%, ops bonus, markup. Export Excel.</p>
+      <h3 class="module-name">Supplier Hub</h3>
+      <p class="module-desc">Database NCC, HDV cộng tác viên, vé tham quan, bảo hiểm — và link Drive folder contracts.</p>
       <div class="module-stats">
         <div class="module-stat">
-          <div class="stat-num" id="stat-quotes">—</div>
-          <div class="stat-label">Quote</div>
+          <div class="stat-num" id="stat-suppliers">—</div>
+          <div class="stat-label">NCC</div>
         </div>
         <div class="module-stat">
-          <div class="stat-num" id="stat-quotes-month">—</div>
-          <div class="stat-label">Tháng này</div>
+          <div class="stat-num" id="stat-tq">—</div>
+          <div class="stat-label">Vé tham quan</div>
         </div>
         <div class="module-stat">
-          <div class="stat-num">VND</div>
-          <div class="stat-label">Đơn vị</div>
+          <div class="stat-num" id="stat-hdv">—</div>
+          <div class="stat-label">HDV cộng tác</div>
         </div>
       </div>
     </a>
+
   </div>
 
   <!-- Coming soon -->
@@ -647,14 +625,14 @@
       <div class="kpi-sub">trong Tour Catalog</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Quote tổng</div>
-      <div class="kpi-val" id="kpi-quotes">—</div>
-      <div class="kpi-sub">đã tính giá</div>
+      <div class="kpi-label">Vé tham quan</div>
+      <div class="kpi-val" id="kpi-tq">—</div>
+      <div class="kpi-sub">có giá auto-fill</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Vùng phủ</div>
       <div class="kpi-val" id="kpi-regions">—</div>
-      <div class="kpi-sub">vùng/miền đang phục vụ</div>
+      <div class="kpi-sub">vùng/miền</div>
     </div>
   </div>
 
@@ -837,12 +815,14 @@ function loadModuleStats() {
       document.getElementById('stat-hdv').textContent = hdvCount;
       document.getElementById('kpi-suppliers').textContent = total;
       document.getElementById('kpi-regions').textContent = regions;
+      document.getElementById('kpi-tq').textContent = tqCount;
     } else {
       document.getElementById('stat-suppliers').textContent = '0';
       document.getElementById('stat-tq').textContent = '0';
       document.getElementById('stat-hdv').textContent = '0';
       document.getElementById('kpi-suppliers').textContent = '0';
       document.getElementById('kpi-regions').textContent = '0';
+      document.getElementById('kpi-tq').textContent = '0';
     }
   } catch (e) { console.error('Load supplier stats:', e); }
 
@@ -869,34 +849,6 @@ function loadModuleStats() {
       document.getElementById('kpi-tours').textContent = '0';
     }
   } catch (e) { console.error('Load tour stats:', e); }
-
-  // Quote Builder stats — try common storage keys
-  try {
-    const keys = ['qb_quotes_v3', 'qb_quotes_v2', 'qb_quotes', 'quotebuilder_quotes'];
-    let quotes = [];
-    for (const key of keys) {
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        try {
-          const data = JSON.parse(raw);
-          if (Array.isArray(data)) { quotes = data; break; }
-          if (data.quotes) { quotes = Object.values(data.quotes); break; }
-        } catch (e) {}
-      }
-    }
-    const total = quotes.length;
-    const now = new Date();
-    const thisMonth = quotes.filter(q => {
-      const dateStr = q.created || q.createdAt || q.date;
-      if (!dateStr) return false;
-      const d = new Date(dateStr);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length;
-
-    document.getElementById('stat-quotes').textContent = total;
-    document.getElementById('stat-quotes-month').textContent = thisMonth;
-    document.getElementById('kpi-quotes').textContent = total;
-  } catch (e) { console.error('Load quote stats:', e); }
 }
 
 // ============================================================
